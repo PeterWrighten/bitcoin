@@ -136,7 +136,7 @@ class ToolWalletTest(BitcoinTestFramework):
         self.assert_raises_tool_error('Error parsing command line arguments: Invalid parameter -foo', '-foo')
         self.assert_raises_tool_error('No method provided. Run `bitcoin-wallet -help` for valid methods.')
         self.assert_raises_tool_error('Wallet name must be provided when creating a new wallet.', 'create')
-        
+
         path = self.nodes[0].wallets_path / "nonexistent.dat"
         self.assert_raises_tool_error("Failed to load database path '{}'. Path does not exist.".format(path), '-wallet=nonexistent.dat', 'info')
 
@@ -144,7 +144,7 @@ class ToolWalletTest(BitcoinTestFramework):
         # Stop the node to close the wallet to call the info command.
         self.stop_node(0)
         self.log.info('Calling wallet tool info, testing output')
-        
+
         # Test wallet tool info with read-only file permissions
         self.log.debug('Setting wallet file permissions to 400 (read-only)')
         os.chmod(self.wallet_path, stat.S_IRUSR)
@@ -160,7 +160,7 @@ class ToolWalletTest(BitcoinTestFramework):
         self.log.debug('Setting wallet file permissions back to 600 (read/write)')
         os.chmod(self.wallet_path, stat.S_IRUSR | stat.S_IWUSR)
         assert self.wallet_permissions() in ['600', '666']  # Sanity check. 666 because Appveyor.
-        
+
         # Wallet tool info should not write to the wallet file when using read-only access
         assert_equal(timestamp_before, timestamp_after)
         shasum_after = self.wallet_shasum()
@@ -187,7 +187,7 @@ class ToolWalletTest(BitcoinTestFramework):
         timestamp_after = self.wallet_timestamp()
         self.log.debug('Wallet file timestamp after calling info: {}'.format(timestamp_after))
         self.log_wallet_timestamp_comparison(timestamp_before, timestamp_after)
-        
+
         # Wallet tool info should not write to the wallet file when using read-only access
         assert_equal(timestamp_before, timestamp_after)
         assert_equal(shasum_before, shasum_after)
