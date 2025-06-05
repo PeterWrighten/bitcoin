@@ -111,6 +111,7 @@ public:
     std::string Filename() override { return "mockable"; }
     std::string Format() override { return "mock"; }
     std::unique_ptr<DatabaseBatch> MakeBatch() override { return std::make_unique<MockableBatch>(m_records, m_pass); }
+    bool IsReadOnly() const override { return false; }
 };
 
 std::unique_ptr<WalletDatabase> CreateMockableWalletDatabase(MockableData records = {});
