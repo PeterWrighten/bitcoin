@@ -167,6 +167,42 @@ class ToolWalletTest(BitcoinTestFramework):
         assert_equal(shasum_before, shasum_after)
         self.log.debug('Wallet file shasum unchanged\n')
 
+    def test_tool_wallet_dump_readonly(self):
+        """Test dump command with read-only wallet file permissions"""
+        self.log.info('Testing dump command with read-only wallet file')
+
+        # Test dump with read-only file permissions
+        self.log.debug('Setting wallet file permissions to 400 (read-only)')
+        os.chmod(self.wallet_path, stat.S_IRUSR)
+        assert self.wallet_permissions() in ['400', '666'] # Sanity check. 666 because Appveyor.
+        shasum_before = self.wallet_shasum()
+        timestamp_before = self.wallet_timestamp()
+        self.log.debug('Wallet file timestamp before calling dump: {}'.format(timestamp_before))
+
+        # Dump should work with read-only permissions
+        wallet_dump = self.nodes[0].datadir_path / "readonly_wallet.dump"
+        self.assert_tool_output('The dumpfile may contain private keys. To ensure the safety of your Bitcoin, do not share the dumpfile.\n', '-wallet=' + self.default_wallet_name, '-dumpfile={}'.format(wallet_dump), 'dump')
+
+        timestamp_after = self.wallet_timestamp()
+        self.log.debug('Wallet file timestamp after calling dump: {}'.format(timestamp_after))
+        self.log_wallet_timestamp_comparison(timestamp_before, timestamp_after)
+        self.log.debug('Setting wallet file permissions back to 600 (read/write)')
+        os.chmod(self.wallet_path, stat.S_IRUSR | stat.S_IWUSR)
+        assert self.wallet_permissions() in ['600', '666']  # Sanity check. 666 because Appveyor.
+
+        # Wallet tool dump should not write to the wallet file when using read-only access
+        assert_equal(timestamp_before, timestamp_after)
+        shasum_after = self.wallet_shasum()
+        assert_equal(shasum_before, shasum_after)
+        self.log.debug('Wallet file shasum unchanged after dump')
+
+        # Verify dump file was created and contains expected data
+        assert wallet_dump.exists(), "Dump file should have been created"
+        dump_data = self.read_dump(wallet_dump)
+        assert_equal(dump_data['BITCOIN_CORE_WALLET_DUMP'], '1')
+        assert_equal(dump_data["format"], "sqlite")
+        self.log.debug('Dump file created successfully with correct format\n')
+
     def test_tool_wallet_info_after_transaction(self):
         """
         Mutate the wallet with a transaction to verify that the info command
@@ -414,6 +450,7 @@ class ToolWalletTest(BitcoinTestFramework):
         self.test_invalid_tool_commands_and_args()
         # Warning: The following tests are order-dependent.
         self.test_tool_wallet_info()
+        self.test_tool_wallet_dump_readonly()
         self.test_tool_wallet_info_after_transaction()
         self.test_tool_wallet_create_on_existing_wallet()
         self.test_getwalletinfo_on_different_wallet()
