@@ -1,6 +1,14 @@
 Bitcoin Core integration/staging tree
 =====================================
 
+FYI:
+
+Peter's Doc
+
+```
+./open_docs.sh all
+```
+
 https://bitcoincore.org
 
 For an immediately usable, binary version of the Bitcoin Core software, see
