@@ -138,7 +138,7 @@ class ToolWalletTest(BitcoinTestFramework):
         self.assert_raises_tool_error('Wallet name must be provided when creating a new wallet.', 'create')
 
         path = self.nodes[0].wallets_path / "nonexistent.dat"
-        self.assert_raises_tool_error("Failed to load database path '{}'. Path does not exist.".format(path), '-wallet=nonexistent.dat', 'info')
+        self.assert_raises_tool_error("Failed to load database path '{}'. Path does not exist.".format(str(path)), '-wallet=nonexistent.dat', 'info')
 
     def test_tool_wallet_info(self):
         # Stop the node to close the wallet to call the info command.
