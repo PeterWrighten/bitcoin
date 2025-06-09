@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Core Node Setup Guide</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Documentation Hub</a>
+        
+        <div class="content">
+            <h1>🏛️ Bitcoin Core Node Setup Guide</h1>
+            <p>Complete step-by-step instructions for setting up and running your Bitcoin mainnet node</p>
+
+            <div class="alert alert-info">
+                <strong>🎯 Goal:</strong> Set up a secure, efficient Bitcoin Core node that validates transactions and contributes to network security while minimizing storage requirements.
+            </div>
+
+            <h2>🚀 Starting Your Node</h2>
+            
+            <h3>Method 1: Using Built Bitcoin Core</h3>
+            <pre><code># From build directory
+cd build
+./bin/bitcoind -prune=2000 -daemon
+
+# Verify it's running
+./bin/bitcoin-cli getblockchaininfo</code></pre>
+
+            <h3>Method 2: Official Bitcoin Core Binary</h3>
+            <pre><code># If you downloaded official version
+bitcoind -prune=2000 -daemon
+
+# Check status
+bitcoin-cli getblockchaininfo</code></pre>
+
+            <h3>Method 3: With Custom Configuration</h3>
+            <pre><code># Using custom config file
+./bin/bitcoind -conf=/path/to/bitcoin.conf -daemon
+
+# Or specify data directory
+./bin/bitcoind -datadir=/custom/path -prune=2000 -daemon</code></pre>
+
+            <h2>📊 Monitoring Your Node</h2>
+            
+            <h3>Check Blockchain Sync Status</h3>
+            <pre><code># Get comprehensive blockchain info
+./bin/bitcoin-cli getblockchaininfo
+
+# Quick sync progress check
+./bin/bitcoin-cli getblockchaininfo | grep -E "(blocks|headers|verificationprogress)"
+
+# Check if initial download is complete
+./bin/bitcoin-cli getblockchaininfo | grep "initialblockdownload"</code></pre>
+
+            <h3>Monitor Network Connections</h3>
+            <pre><code># Check number of connected peers
+./bin/bitcoin-cli getconnectioncount
+
+# Detailed peer information
+./bin/bitcoin-cli getpeerinfo
+
+# Network status
+./bin/bitcoin-cli getnetworkinfo</code></pre>
+
+            <h3>Verify Pruning Status</h3>
+            <pre><code># Check pruning configuration
+./bin/bitcoin-cli getblockchaininfo | grep -E "(pruned|pruneheight|prune_target_size)"
+
+# Monitor disk usage
+du -sh ~/Library/Application\ Support/Bitcoin/</code></pre>
+
+            <h2>📈 Expected Storage & Sync Times</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Phase</th>
+                        <th>Storage Used</th>
+                        <th>Duration</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Initial Download</td>
+                        <td>0 → 500GB</td>
+                        <td>Hours to Days</td>
+                        <td>Downloading and validating all blocks</td>
+                    </tr>
+                    <tr>
+                        <td>Pruning Phase</td>
+                        <td>500GB → 2-5GB</td>
+                        <td>Minutes</td>
+                        <td>Deleting old blocks after validation</td>
+                    </tr>
+                    <tr style="background-color: #d4edda;">
+                        <td>Steady State</td>
+                        <td>2-5GB</td>
+                        <td>Ongoing</td>
+                        <td>Normal operation with pruning</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>🔧 Essential Node Management Commands</h2>
+            
+            <h3>Start/Stop Operations</h3>
+            <pre><code># Start node in background
+./bin/bitcoind -prune=2000 -daemon
+
+# Stop node gracefully
+./bin/bitcoin-cli stop
+
+# Check if node is running
+./bin/bitcoin-cli getblockchaininfo > /dev/null && echo "Node is running" || echo "Node is stopped"</code></pre>
+
+            <h3>Log Monitoring</h3>
+            <pre><code># Monitor live log output
+tail -f ~/Library/Application\ Support/Bitcoin/debug.log
+
+# Search for errors
+grep -i error ~/Library/Application\ Support/Bitcoin/debug.log
+
+# Filter by category
+grep "net:" ~/Library/Application\ Support/Bitcoin/debug.log</code></pre>
+
+            <h3>Emergency Recovery</h3>
+            <div class="alert alert-warning">
+                <strong>⚠️ Use with caution:</strong> These commands can result in re-downloading the entire blockchain
+            </div>
+            <pre><code># If sync gets stuck, restart cleanly
+./bin/bitcoin-cli stop
+./bin/bitcoind -prune=2000 -daemon
+
+# Nuclear option: Reset blockchain data (LAST RESORT)
+./bin/bitcoin-cli stop
+rm -rf ~/Library/Application\ Support/Bitcoin/blocks/
+rm -rf ~/Library/Application\ Support/Bitcoin/chainstate/
+./bin/bitcoind -prune=2000 -daemon</code></pre>
+
+            <h2>💼 Wallet Management</h2>
+            
+            <h3>Creating and Using Wallets</h3>
+            <pre><code># Create a new wallet
+./bin/bitcoin-cli createwallet "mywallet"
+
+# List available wallets
+./bin/bitcoin-cli listwallets
+
+# Get wallet information
+./bin/bitcoin-cli getwalletinfo
+
+# Generate a receiving address
+./bin/bitcoin-cli getnewaddress
+
+# Check wallet balance
+./bin/bitcoin-cli getbalance</code></pre>
+
+            <h3>Wallet Security</h3>
+            <div class="alert alert-danger">
+                <strong>🔒 Security Note:</strong> Never use mainnet wallets with test builds or share private keys
+            </div>
+            <pre><code># Create encrypted wallet
+./bin/bitcoin-cli createwallet "secure_wallet" false false "" false false true
+
+# Backup wallet
+./bin/bitcoin-cli backupwallet "/safe/location/wallet_backup.dat"
+
+# Load existing wallet
+./bin/bitcoin-cli loadwallet "wallet_name"</code></pre>
+
+            <h2>🎯 Success Indicators</h2>
+            
+            <div class="alert alert-info">
+                <h3>✅ Your node is working correctly when:</h3>
+                <ul>
+                    <li><code>verificationprogress</code> approaches 1.0 (99.9%+)</li>
+                    <li><code>"initialblockdownload": false</code> in blockchain info</li>
+                    <li><code>"pruned": true</code> confirms pruning is active</li>
+                    <li>Connected to 8+ peers consistently</li>
+                    <li>Data directory size stable around your prune target</li>
+                    <li>Can create wallets and generate addresses</li>
+                </ul>
+            </div>
+
+            <h2>🔍 Troubleshooting Common Issues</h2>
+            
+            <h3>Sync Problems</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Slow Sync Speed</h4>
+                <ul>
+                    <li>Check internet connection stability</li>
+                    <li>Ensure sufficient disk space available</li>
+                    <li>Try increasing <code>-dbcache</code> parameter</li>
+                    <li>Consider using <code>-assumevalid</code> for faster initial sync</li>
+                </ul>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Connection Issues</h4>
+                <ul>
+                    <li>Check firewall settings (port 8333)</li>
+                    <li>Verify network connectivity</li>
+                    <li>Try different DNS servers</li>
+                    <li>Use <code>-addnode</code> to connect to specific peers</li>
+                </ul>
+            </div>
+
+            <h3>Resource Issues</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>High Memory Usage</h4>
+                <ul>
+                    <li>Reduce <code>-dbcache</code> value (default: auto)</li>
+                    <li>Lower <code>-maxmempool</code> size</li>
+                    <li>Increase prune value to reduce I/O</li>
+                </ul>
+            </div>
+
+            <h2>⚙️ Optimization Tips</h2>
+            
+            <h3>Performance Tuning</h3>
+            <pre><code># Optimized startup for faster sync
+./bin/bitcoind -prune=2000 -daemon \
+  -dbcache=1000 \
+  -maxconnections=16 \
+  -par=4 \
+  -checkblocks=24
+
+# Memory-constrained setup
+./bin/bitcoind -prune=550 -daemon \
+  -dbcache=50 \
+  -maxconnections=8 \
+  -maxmempool=50</code></pre>
+
+            <h3>Network Optimization</h3>
+            <pre><code># Limit bandwidth usage
+./bin/bitcoind -prune=2000 -daemon \
+  -maxuploadtarget=1000 \
+  -maxconnections=8
+
+# For unstable connections
+./bin/bitcoind -prune=2000 -daemon \
+  -timeout=60000 \
+  -peertimeout=120</code></pre>
+
+            <div class="alert alert-info">
+                <h3>💡 Pro Tips</h3>
+                <ul>
+                    <li><strong>Automation:</strong> Use systemd/launchd to auto-start your node</li>
+                    <li><strong>Monitoring:</strong> Set up log rotation to prevent disk space issues</li>
+                    <li><strong>Backup:</strong> Regularly backup your wallet.dat files</li>
+                    <li><strong>Updates:</strong> Keep Bitcoin Core updated for security and performance</li>
+                    <li><strong>Testing:</strong> Always test wallet operations on testnet first</li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p><a href="index.html" style="color: rgba(255,255,255,0.8);">← Back to Documentation Hub</a></p>
+        </footer>
+    </div>
+</body>
+</html> 

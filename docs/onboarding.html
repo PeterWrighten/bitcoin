@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Core Developer Onboarding</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Documentation Hub</a>
+        
+        <div class="content">
+            <h1>🚀 Bitcoin Core - Developer Onboarding Guide</h1>
+            <p>Welcome to Bitcoin Core development! This guide will help you understand what Bitcoin Core is and how to get started contributing.</p>
+
+            <h2>🎯 What is Bitcoin Core?</h2>
+            <p><strong>Bitcoin Core</strong> is the reference implementation of the Bitcoin protocol. It's the software that:</p>
+            <ul>
+                <li><strong>Validates</strong> all Bitcoin transactions and blocks</li>
+                <li><strong>Maintains</strong> the complete Bitcoin blockchain</li>
+                <li><strong>Provides</strong> wallet functionality for managing Bitcoin</li>
+                <li><strong>Implements</strong> the peer-to-peer network protocol</li>
+                <li><strong>Serves</strong> as the foundation that other Bitcoin software builds upon</li>
+            </ul>
+            <p>Think of it as the "official" Bitcoin software that defines how Bitcoin actually works.</p>
+
+            <h2>🏗️ High-Level Architecture</h2>
+            <p>Bitcoin Core consists of several key components working together:</p>
+            <pre><code>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Bitcoin CLI   │    │   Bitcoin QT    │    │  Bitcoin Wallet │
+│  (Command Line) │    │      (GUI)      │    │     (Tool)      │
+└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
+          │                      │                      │
+          └──────────────────────┼──────────────────────┘
+                                 │
+                    ┌─────────────▼──────────────┐
+                    │        Bitcoin Core        │
+                    │        (bitcoind)          │
+                    └─────────────┬──────────────┘
+                                  │
+        ┌─────────────────────────┼─────────────────────────┐
+        │                         │                         │
+┌───────▼────────┐    ┌──────────▼───────────┐    ┌────────▼────────┐
+│   P2P Network  │    │     Validation       │    │   Wallet Engine │
+│   (Networking) │    │   (Consensus Rules)  │    │  (Key Management)│
+└────────────────┘    └──────────────────────┘    └─────────────────┘
+        │                         │                         │
+        │              ┌──────────▼───────────┐             │
+        │              │      Database        │             │
+        │              │   (Blockchain Data)  │             │
+        │              └──────────────────────┘             │
+        │                                                   │
+        └───────────────────────┬───────────────────────────┘
+                                │
+                    ┌───────────▼────────────┐
+                    │      File System       │
+                    │  (blocks/, chainstate/,│
+                    │     wallets/, etc.)    │
+                    └────────────────────────┘</code></pre>
+
+            <h2>🧩 Key Components</h2>
+            
+            <h3>1. bitcoind - The Core Daemon</h3>
+            <ul>
+                <li>Heart of Bitcoin Core</li>
+                <li>Validates transactions and blocks</li>
+                <li>Maintains the blockchain</li>
+                <li>Handles peer-to-peer networking</li>
+                <li>Provides RPC API for other tools</li>
+            </ul>
+
+            <h3>2. bitcoin-cli - Command Line Interface</h3>
+            <ul>
+                <li>Talks to bitcoind via RPC</li>
+                <li>Used for wallet operations, queries, administration</li>
+                <li>Great for scripting and automation</li>
+            </ul>
+
+            <h3>3. bitcoin-wallet - Wallet Management Tool</h3>
+            <ul>
+                <li>Standalone wallet operations</li>
+                <li>Create, backup, restore wallets</li>
+                <li>Works without running bitcoind</li>
+            </ul>
+
+            <h3>4. bitcoin-qt - Graphical Interface</h3>
+            <ul>
+                <li>Desktop GUI application</li>
+                <li>User-friendly interface for non-technical users</li>
+                <li>Includes wallet functionality</li>
+            </ul>
+
+            <h3>5. bitcoin-util - Utility Tool</h3>
+            <ul>
+                <li>Various helper functions</li>
+                <li>Block/transaction analysis</li>
+                <li>Development utilities</li>
+            </ul>
+
+            <h2>📁 Source Code Structure</h2>
+            <p>Understanding the codebase layout:</p>
+            <pre><code>bitcoin/
+├── src/                    # Main source code (C++)
+│   ├── wallet/            # Wallet implementation
+│   ├── net/               # Networking code
+│   ├── consensus/         # Consensus rules
+│   ├── script/            # Script execution
+│   ├── primitives/        # Basic data structures
+│   ├── crypto/            # Cryptographic functions
+│   ├── rpc/               # RPC server implementation
+│   ├── test/              # Unit tests
+│   └── qt/                # GUI code
+│
+├── test/                   # Test infrastructure
+│   ├── functional/        # End-to-end tests (Python)
+│   ├── fuzz/              # Fuzzing tests
+│   └── lint/              # Code style checks
+│
+├── doc/                    # Documentation
+├── contrib/                # Build scripts and tools
+├── build/                  # Build directory (after cmake)
+└── depends/                # Dependency management</code></pre>
+
+            <h2>🔑 Core Concepts You Should Know</h2>
+            
+            <h3>1. Consensus Rules</h3>
+            <ul>
+                <li>Rules that all Bitcoin nodes must agree on</li>
+                <li>Define what makes a valid block/transaction</li>
+                <li>Changes require network-wide agreement</li>
+                <li>Located in <code>src/consensus/</code></li>
+            </ul>
+
+            <h3>2. Script System</h3>
+            <ul>
+                <li>Bitcoin's programming language</li>
+                <li>Controls how Bitcoin can be spent</li>
+                <li>Stack-based, simple operations</li>
+                <li>Found in <code>src/script/</code></li>
+            </ul>
+
+            <h3>3. Peer-to-Peer Network</h3>
+            <ul>
+                <li>How Bitcoin nodes communicate</li>
+                <li>Handles block/transaction propagation</li>
+                <li>Manages connections to other nodes</li>
+                <li>Implemented in <code>src/net/</code></li>
+            </ul>
+
+            <h3>4. Wallet</h3>
+            <ul>
+                <li>Manages private keys and addresses</li>
+                <li>Creates and signs transactions</li>
+                <li>Tracks balances and transaction history</li>
+                <li>Code in <code>src/wallet/</code></li>
+            </ul>
+
+            <h3>5. Database Layer</h3>
+            <ul>
+                <li>Stores blockchain data efficiently</li>
+                <li>Uses LevelDB for chainstate</li>
+                <li>SQLite for wallet data</li>
+                <li>File-based block storage</li>
+            </ul>
+
+            <h2>🚀 Getting Started - First Steps</h2>
+            
+            <h3>1. Set Up Development Environment</h3>
+            <pre><code># Clone the repository
+git clone https://github.com/bitcoin/bitcoin.git
+cd bitcoin
+
+# Install dependencies (Ubuntu/Debian)
+sudo apt update
+sudo apt install build-essential cmake pkg-config bsdmainutils python3
+
+# macOS with Homebrew
+brew install cmake pkg-config</code></pre>
+
+            <h3>2. Build Bitcoin Core</h3>
+            <pre><code># Configure and build
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+make -j$(nproc)</code></pre>
+
+            <h3>3. Run Your First Tests</h3>
+            <pre><code># Unit tests
+./bin/test_bitcoin
+
+# Functional tests (a few quick ones)
+../test/functional/wallet_basic.py
+../test/functional/example_test.py</code></pre>
+
+            <h3>4. Start Exploring</h3>
+            <pre><code># Start in regtest mode (safe for development)
+./bin/bitcoind -regtest -daemon
+
+# Create a wallet
+./bin/bitcoin-cli -regtest createwallet "test"
+
+# Generate some blocks
+./bin/bitcoin-cli -regtest generatetoaddress 101 $(./bin/bitcoin-cli -regtest getnewaddress)
+
+# Check the balance
+./bin/bitcoin-cli -regtest getbalance</code></pre>
+
+            <h2>🧪 Testing Philosophy</h2>
+            <p>Bitcoin Core has extensive testing because bugs can be catastrophic:</p>
+            
+            <h3>Test Types:</h3>
+            <ol>
+                <li><strong>Unit Tests</strong> (<code>src/test/</code>) - Test individual functions/classes</li>
+                <li><strong>Functional Tests</strong> (<code>test/functional/</code>) - Test complete workflows</li>
+                <li><strong>Fuzz Tests</strong> (<code>test/fuzz/</code>) - Find edge cases with random input</li>
+                <li><strong>Integration Tests</strong> - Test component interactions</li>
+            </ol>
+
+            <h3>Test-Driven Development:</h3>
+            <ul>
+                <li>Write tests for new features</li>
+                <li>Ensure tests fail before implementing</li>
+                <li>Make tests pass with minimal code</li>
+                <li>Refactor while keeping tests green</li>
+            </ul>
+
+            <h2>💡 Development Best Practices</h2>
+            
+            <h3>Code Style:</h3>
+            <ul>
+                <li>Follow existing conventions</li>
+                <li>Run linters: <code>test/lint/lint-all.py</code></li>
+                <li>Keep changes minimal and focused</li>
+                <li>Use meaningful variable names</li>
+            </ul>
+
+            <h3>Commit Messages:</h3>
+            <pre><code>component: brief description
+
+Longer explanation of what this change does and why it's needed.
+Can span multiple lines and include technical details.</code></pre>
+
+            <h3>Pull Request Process:</h3>
+            <ol>
+                <li>Create feature branch from master</li>
+                <li>Make focused, atomic commits</li>
+                <li>Write comprehensive tests</li>
+                <li>Update documentation if needed</li>
+                <li>Open PR with clear description</li>
+                <li>Address review feedback</li>
+                <li>Squash commits if requested</li>
+            </ol>
+
+            <div class="alert alert-danger">
+                <h3>Safety First:</h3>
+                <ul>
+                    <li>Always test on regtest first</li>
+                    <li>Never test with real Bitcoin on mainnet</li>
+                    <li>Understand consensus implications</li>
+                    <li>Get review for any consensus changes</li>
+                </ul>
+            </div>
+
+            <h2>🌟 Areas for Contribution</h2>
+            
+            <h3>Good First Issues:</h3>
+            <ul>
+                <li>Documentation improvements</li>
+                <li>Test coverage expansion</li>
+                <li>Code cleanup and refactoring</li>
+                <li>Build system improvements</li>
+                <li>GUI enhancements</li>
+            </ul>
+
+            <h3>Advanced Areas:</h3>
+            <ul>
+                <li>Consensus rule changes</li>
+                <li>P2P protocol improvements</li>
+                <li>Wallet functionality</li>
+                <li>Performance optimizations</li>
+                <li>Security enhancements</li>
+            </ul>
+
+            <h2>🔍 How to Find Your Way Around</h2>
+            
+            <h3>When looking for code:</h3>
+            <ol>
+                <li><strong>Start with tests</strong> - they show how things work</li>
+                <li><strong>Follow RPC commands</strong> - see how CLI translates to internal functions</li>
+                <li><strong>Use grep</strong> - search for function names or error messages</li>
+                <li><strong>Check git history</strong> - see how features evolved</li>
+            </ol>
+
+            <h3>Useful grep patterns:</h3>
+            <pre><code># Find RPC command implementation
+grep -r "getnewaddress" src/
+
+# Find test for specific functionality  
+grep -r "test.*wallet.*create" test/
+
+# Find consensus rules
+grep -r "MAX_BLOCK_SIZE" src/consensus/</code></pre>
+
+            <h2>🎓 Learning Resources</h2>
+            
+            <h3>Essential Reading:</h3>
+            <ul>
+                <li><a href="https://bitcoin.org/bitcoin.pdf" target="_blank">Bitcoin Whitepaper</a></li>
+                <li><a href="https://bitcoincore.org/en/doc/" target="_blank">Developer Documentation</a></li>
+                <li><a href="https://github.com/bitcoin/bips" target="_blank">BIP (Bitcoin Improvement Proposals)</a></li>
+            </ul>
+
+            <h3>Code Understanding:</h3>
+            <ul>
+                <li>Start with <code>test/functional/example_test.py</code></li>
+                <li>Read <code>src/rpc/</code> to understand API</li>
+                <li>Explore <code>src/primitives/</code> for basic structures</li>
+                <li>Study <code>src/consensus/</code> for rules</li>
+            </ul>
+
+            <div class="alert alert-warning">
+                <h2>⚠️ Important Warnings</h2>
+                <ol>
+                    <li><strong>Never use development builds with real Bitcoin</strong></li>
+                    <li><strong>Consensus changes require extreme care</strong></li>
+                    <li><strong>Always backup wallets before testing</strong></li>
+                    <li><strong>Understand the difference between testnet, regtest, and mainnet</strong></li>
+                    <li><strong>Security vulnerabilities should be reported privately</strong></li>
+                </ol>
+            </div>
+
+            <h2>🎯 Your First Contribution Goal</h2>
+            <p><strong>Suggested path:</strong></p>
+            <ol>
+                <li>✅ Build Bitcoin Core successfully</li>
+                <li>✅ Run unit and functional tests</li>
+                <li>✅ Start bitcoind in regtest mode</li>
+                <li>✅ Create and fund a test wallet</li>
+                <li>✅ Read through a simple functional test</li>
+                <li>✅ Find a "good first issue" on GitHub</li>
+                <li>✅ Make a small documentation improvement</li>
+                <li>✅ Submit your first pull request</li>
+            </ol>
+
+            <div class="alert alert-info">
+                <p>Remember: Bitcoin Core development is about precision, testing, and safety. Take your time to understand how things work before making changes. The community is helpful, but everyone shares the responsibility of maintaining the world's most important cryptocurrency software.</p>
+                <p><strong>Welcome to Bitcoin development! 🚀</strong></p>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p><a href="index.html" style="color: rgba(255,255,255,0.8);">← Back to Documentation Hub</a></p>
+        </footer>
+    </div>
+</body>
+</html> 

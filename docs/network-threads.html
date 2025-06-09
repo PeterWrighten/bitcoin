@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Core Network & Threads</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Documentation Hub</a>
+        
+        <div class="content">
+            <h1>🌐 Bitcoin Core Network & Threads</h1>
+            <p>Understanding Bitcoin Core's network connections, thread management, and peer-to-peer architecture</p>
+
+            <div class="alert alert-info">
+                <strong>🎯 Overview:</strong> Bitcoin Core uses a sophisticated multithreaded architecture to handle network communications, block validation, and transaction processing efficiently.
+            </div>
+
+            <h2>🔗 Network Architecture Overview</h2>
+            
+            <h3>Peer-to-Peer Network Structure</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Connection Types:</h4>
+                <ul>
+                    <li><strong>📤 Outbound Connections:</strong> Your node initiates these (typically 8-10)</li>
+                    <li><strong>📥 Inbound Connections:</strong> Other nodes connect to you (up to 117 by default)</li>
+                    <li><strong>🔗 Block-Relay-Only:</strong> Special connections for block propagation</li>
+                    <li><strong>⚡ Feeler Connections:</strong> Temporary connections to test peer viability</li>
+                </ul>
+            </div>
+
+            <h3>Network Protocol Basics</h3>
+            <pre><code># Check network protocol information
+./bin/bitcoin-cli getnetworkinfo
+
+# View peer protocol versions
+./bin/bitcoin-cli getpeerinfo | grep -E "(version|subver|addr)"
+
+# Check local node services
+./bin/bitcoin-cli getnetworkinfo | grep localservices</code></pre>
+
+            <h2>⚡ Thread Architecture</h2>
+
+            <h3>Core Thread Types</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thread Type</th>
+                        <th>Count</th>
+                        <th>Purpose</th>
+                        <th>Critical</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Main Thread</td>
+                        <td>1</td>
+                        <td>Primary application logic</td>
+                        <td>✅ Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Network I/O</td>
+                        <td>1</td>
+                        <td>Socket operations, peer communication</td>
+                        <td>✅ Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Message Handler</td>
+                        <td>1</td>
+                        <td>Processing P2P messages</td>
+                        <td>✅ Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Script Validation</td>
+                        <td>2-16</td>
+                        <td>Parallel transaction verification</td>
+                        <td>✅ Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Block Validation</td>
+                        <td>1</td>
+                        <td>Block processing and validation</td>
+                        <td>✅ Yes</td>
+                    </tr>
+                    <tr>
+                        <td>RPC Server</td>
+                        <td>1-4</td>
+                        <td>JSON-RPC command processing</td>
+                        <td>🔶 Medium</td>
+                    </tr>
+                    <tr>
+                        <td>Wallet</td>
+                        <td>1-2</td>
+                        <td>Wallet operations (if enabled)</td>
+                        <td>🔶 Medium</td>
+                    </tr>
+                    <tr>
+                        <td>Index Updates</td>
+                        <td>1-3</td>
+                        <td>Transaction index maintenance</td>
+                        <td>🔷 Low</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Thread Monitoring Commands</h3>
+            <pre><code># Monitor Bitcoin Core processes and threads
+ps -M $(pgrep bitcoind)
+
+# Detailed thread information (macOS)
+ps -M -o pid,ppid,tid,state,pcpu,time,command $(pgrep bitcoind)
+
+# Memory usage per thread
+ps -M -o pid,tid,rss,vsz,comm $(pgrep bitcoind)
+
+# Using our monitoring script
+../network_threads_monitor.sh</code></pre>
+
+            <h2>🔍 Network Connection Analysis</h2>
+
+            <h3>Connection Status Commands</h3>
+            <pre><code># Basic connection count
+./bin/bitcoin-cli getconnectioncount
+
+# Detailed peer information
+./bin/bitcoin-cli getpeerinfo
+
+# Network totals (bandwidth usage)
+./bin/bitcoin-cli getnettotals
+
+# Address manager information
+./bin/bitcoin-cli getnodeaddresses</code></pre>
+
+            <h3>Peer Connection Details</h3>
+            <pre><code># Show connection types and directions
+./bin/bitcoin-cli getpeerinfo | jq '.[] | {addr, inbound, connection_type}'
+
+# Monitor connection durations
+./bin/bitcoin-cli getpeerinfo | jq '.[] | {addr, conntime: (.conntime | todate)}'
+
+# Check peer services
+./bin/bitcoin-cli getpeerinfo | jq '.[] | {addr, services, subver}'
+
+# Bandwidth usage per peer
+./bin/bitcoin-cli getpeerinfo | jq '.[] | {addr, bytessent, bytesrecv}'</code></pre>
+
+            <h3>Network Health Indicators</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>✅ Healthy Network Status:</h4>
+                <ul>
+                    <li><strong>Connections:</strong> 8+ outbound, some inbound</li>
+                    <li><strong>Diversity:</strong> Peers from different IPs/networks</li>
+                    <li><strong>Protocol:</strong> Recent protocol versions (70016+)</li>
+                    <li><strong>Services:</strong> Mix of full nodes and light clients</li>
+                    <li><strong>Latency:</strong> Reasonable ping times (&lt;1000ms)</li>
+                </ul>
+            </div>
+
+            <h2>📊 Real-Time Network Monitoring</h2>
+
+            <h3>Live Network Dashboard</h3>
+            <pre><code># Create network monitoring script
+cat > network_dashboard.sh << 'EOF'
+#!/bin/bash
+clear
+echo "=== Bitcoin Core Network Dashboard ==="
+echo "Timestamp: $(date)"
+echo ""
+
+# Connection summary
+CONNECTIONS=$(./bin/bitcoin-cli getconnectioncount)
+echo "🔗 CONNECTIONS: $CONNECTIONS"
+
+# Connection breakdown
+./bin/bitcoin-cli getpeerinfo | jq -r '
+  group_by(.inbound) | 
+  map({direction: (if .[0].inbound then "Inbound" else "Outbound" end), count: length}) | 
+  .[] | "\(.direction): \(.count)"
+'
+
+echo ""
+
+# Network traffic
+./bin/bitcoin-cli getnettotals | jq -r '
+  "📊 TRAFFIC:",
+  "Sent: \(.totalbytessent | tonumber / 1024 / 1024 | floor)MB",
+  "Received: \(.totalbytesrecv | tonumber / 1024 / 1024 | floor)MB"
+'
+
+echo ""
+
+# Recent connections
+echo "🌐 RECENT PEERS:"
+./bin/bitcoin-cli getpeerinfo | jq -r '
+  sort_by(.conntime) | 
+  reverse | 
+  .[0:5] | 
+  .[] | 
+  "\(.addr) - \(.subver) - \(.conntime | strftime("%H:%M:%S"))"
+'
+EOF
+
+chmod +x network_dashboard.sh</code></pre>
+
+            <h3>Connection Quality Analysis</h3>
+            <pre><code># Analyze peer quality
+./bin/bitcoin-cli getpeerinfo | jq '.[] | {
+  addr,
+  quality: {
+    version: .version,
+    services: .services,
+    ping: .pingtime,
+    last_recv: .lastrecv,
+    bytes_ratio: (.bytessent / .bytesrecv)
+  }
+}'
+
+# Find potential problem peers
+./bin/bitcoin-cli getpeerinfo | jq '.[] | select(.pingtime > 1000 or .bytesrecv < 1000) | {addr, pingtime, bytesrecv}'</code></pre>
+
+            <h2>🛠️ Network Configuration</h2>
+
+            <h3>Connection Management</h3>
+            <pre><code># Manually add a trusted peer
+./bin/bitcoin-cli addnode "trusted.peer.ip:8333" "add"
+
+# Remove a problematic peer
+./bin/bitcoin-cli addnode "bad.peer.ip:8333" "remove"
+
+# Try connecting to a specific peer once
+./bin/bitcoin-cli addnode "test.peer.ip:8333" "onetry"
+
+# Disconnect from a specific peer
+./bin/bitcoin-cli disconnectnode "peer.ip:8333"</code></pre>
+
+            <h3>Advanced Network Settings</h3>
+            <pre><code># Configuration options for bitcoin.conf
+echo "
+# Network Configuration Examples
+maxconnections=125        # Maximum total connections
+maxuploadtarget=1000     # Limit upload bandwidth (MB/day)
+onlynet=ipv4            # Only use IPv4
+proxy=127.0.0.1:9050    # SOCKS5 proxy (Tor)
+listen=1                # Accept incoming connections
+discover=1              # Discover peers via DNS
+addnode=trusted.node.com # Add trusted node
+connect=only.this.node  # Connect only to specific node
+" >> bitcoin_network_config.example</code></pre>
+
+            <h2>🔧 Thread Optimization</h2>
+
+            <h3>Performance Tuning</h3>
+            <pre><code># Script verification threads (default: auto-detected cores)
+./bin/bitcoind -par=4 -daemon
+
+# Database cache size affects I/O threads
+./bin/bitcoind -dbcache=1000 -daemon
+
+# RPC thread configuration
+./bin/bitcoind -rpcthreads=8 -daemon
+
+# Combined optimized startup
+./bin/bitcoind -prune=2000 \
+  -par=4 \
+  -dbcache=1000 \
+  -rpcthreads=4 \
+  -maxconnections=16 \
+  -daemon</code></pre>
+
+            <h3>Memory and CPU Optimization</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Thread Tuning Guidelines:</h4>
+                <ul>
+                    <li><strong>Script Threads (-par):</strong> Usually = CPU cores, max benefit ~8</li>
+                    <li><strong>DB Cache (-dbcache):</strong> More cache = fewer I/O threads needed</li>
+                    <li><strong>RPC Threads:</strong> 2-8 threads sufficient for most uses</li>
+                    <li><strong>Connections:</strong> More connections = more network threads</li>
+                </ul>
+            </div>
+
+            <h2>🚨 Troubleshooting Network Issues</h2>
+
+            <h3>Common Network Problems</h3>
+            <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>🔸 Low Connection Count</h4>
+                <ul>
+                    <li>Check firewall settings (port 8333)</li>
+                    <li>Verify internet connectivity</li>
+                    <li>Check DNS resolution</li>
+                    <li>Try different network interfaces</li>
+                </ul>
+            </div>
+
+            <div style="background: #f8d7da; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>🔸 Sync Stalling</h4>
+                <ul>
+                    <li>Check if peers are responsive</li>
+                    <li>Verify thread health</li>
+                    <li>Monitor block validation progress</li>
+                    <li>Check for resource exhaustion</li>
+                </ul>
+            </div>
+
+            <h3>Diagnostic Commands</h3>
+            <pre><code># Check for banned peers
+./bin/bitcoin-cli listbanned
+
+# Monitor recent network activity
+tail -f ~/.bitcoin/debug.log | grep -E "(net|peer)"
+
+# Check for connection errors
+grep -i "connect" ~/.bitcoin/debug.log | tail -20
+
+# Monitor thread activity
+grep -E "(thread|worker)" ~/.bitcoin/debug.log | tail -10</code></pre>
+
+            <h2>📈 Performance Metrics</h2>
+
+            <h3>Network Performance Indicators</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Good Range</th>
+                        <th>Command</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Connection Count</td>
+                        <td>8-125</td>
+                        <td><code>getconnectioncount</code></td>
+                    </tr>
+                    <tr>
+                        <td>Ping Time</td>
+                        <td>&lt;500ms</td>
+                        <td><code>getpeerinfo | grep ping</code></td>
+                    </tr>
+                    <tr>
+                        <td>Thread Count</td>
+                        <td>15-30</td>
+                        <td><code>ps -M bitcoind | wc -l</code></td>
+                    </tr>
+                    <tr>
+                        <td>Memory Usage</td>
+                        <td>&lt;2GB</td>
+                        <td><code>ps -o rss bitcoind</code></td>
+                    </tr>
+                    <tr>
+                        <td>CPU Usage</td>
+                        <td>&lt;50% avg</td>
+                        <td><code>top -p bitcoind</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Automated Health Checks</h3>
+            <pre><code># Create health check script
+cat > health_check.sh << 'EOF'
+#!/bin/bash
+echo "=== Bitcoin Core Health Check ==="
+
+# Check connections
+CONNECTIONS=$(./bin/bitcoin-cli getconnectioncount)
+if [ "$CONNECTIONS" -lt 3 ]; then
+    echo "❌ LOW CONNECTIONS: $CONNECTIONS (recommended: 8+)"
+else
+    echo "✅ CONNECTIONS: $CONNECTIONS"
+fi
+
+# Check thread count
+THREADS=$(ps -M $(pgrep bitcoind) | wc -l)
+echo "⚡ THREADS: $THREADS"
+
+# Check memory usage
+MEMORY=$(ps -o rss= $(pgrep bitcoind))
+MEMORY_MB=$((MEMORY / 1024))
+echo "💾 MEMORY: ${MEMORY_MB}MB"
+
+# Check sync status
+SYNC=$(./bin/bitcoin-cli getblockchaininfo | grep verificationprogress | cut -d: -f2 | cut -d, -f1)
+echo "🔄 SYNC: ${SYNC}"
+
+# Check for recent errors
+ERRORS=$(grep -i error ~/.bitcoin/debug.log | tail -1)
+if [ -n "$ERRORS" ]; then
+    echo "⚠️  RECENT ERROR: $ERRORS"
+else
+    echo "✅ NO RECENT ERRORS"
+fi
+EOF
+
+chmod +x health_check.sh</code></pre>
+
+            <h2>🔍 Advanced Network Analysis</h2>
+
+            <h3>Peer Geographic Distribution</h3>
+            <pre><code># Analyze peer distribution (requires jq and geoip tools)
+./bin/bitcoin-cli getpeerinfo | jq -r '.[].addr' | \
+  sed 's/:.*//' | \
+  while read ip; do
+    echo "$ip $(geoiplookup $ip 2>/dev/null | cut -d: -f2)"
+  done</code></pre>
+
+            <h3>Network Security Analysis</h3>
+            <pre><code># Check for suspicious peers
+./bin/bitcoin-cli getpeerinfo | jq '.[] | select(.bytesrecv == 0 and .conntime > 3600)'
+
+# Monitor for unusual connection patterns
+./bin/bitcoin-cli getpeerinfo | jq 'group_by(.addr | split(".")[0:2] | join(".")) | map({subnet: (.[0].addr | split(".")[0:2] | join(".")), count: length}) | sort_by(.count) | reverse'</code></pre>
+
+            <div class="alert alert-info">
+                <h3>💡 Network Best Practices</h3>
+                <ul>
+                    <li><strong>Diversity:</strong> Maintain connections to geographically distributed peers</li>
+                    <li><strong>Stability:</strong> Keep long-running connections for better sync</li>
+                    <li><strong>Security:</strong> Monitor for unusual peer behavior or connection patterns</li>
+                    <li><strong>Performance:</strong> Balance connection count with available bandwidth</li>
+                    <li><strong>Privacy:</strong> Consider using Tor for enhanced privacy</li>
+                </ul>
+            </div>
+
+            <h2>🌍 Network Protocols & Standards</h2>
+
+            <h3>Bitcoin Protocol Versions</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <table>
+                    <tr><th>Version</th><th>Features</th><th>Release</th></tr>
+                    <tr><td>70016</td><td>NODE_WITNESS support, Segregated Witness</td><td>2017</td></tr>
+                    <tr><td>70015</td><td>BIP 111: NODE_BLOOM service bit</td><td>2015</td></tr>
+                    <tr><td>70014</td><td>BIP 152: Compact block relay</td><td>2016</td></tr>
+                    <tr><td>70013</td><td>BIP 130: sendheaders message</td><td>2015</td></tr>
+                </table>
+            </div>
+
+            <h3>Service Flags Understanding</h3>
+            <pre><code># Decode service flags
+./bin/bitcoin-cli getpeerinfo | jq '.[] | {addr, services_hex: .services, services_dec: (.services | tonumber)}'
+
+# Common service flag meanings:
+# 0x01 (NODE_NETWORK) - Full node with complete blockchain
+# 0x04 (NODE_BLOOM) - Supports bloom filtering  
+# 0x08 (NODE_WITNESS) - Supports segregated witness
+# 0x400 (NODE_NETWORK_LIMITED) - Pruned node with recent blocks</code></pre>
+        </div>
+        
+        <footer class="footer">
+            <p><a href="index.html" style="color: rgba(255,255,255,0.8);">← Back to Documentation Hub</a></p>
+        </footer>
+    </div>
+</body>
+</html> 

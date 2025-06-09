@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Core Contributor Guide</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Documentation Hub</a>
+        
+        <div class="content">
+            <h1>🤝 Bitcoin Core Contributor Guide</h1>
+            <p>Complete guide for contributing to Bitcoin Core, including workflow, communication channels, and community guidelines</p>
+
+            <div class="alert alert-info">
+                <strong>🎯 Welcome!</strong> Bitcoin Core operates an open contributor model where anyone is welcome to contribute through peer review, testing, and patches. This guide will help you get started.
+            </div>
+
+            <h2>📋 Table of Contents</h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <ul>
+                    <li><a href="#getting-started">Getting Started</a></li>
+                    <li><a href="#communication">Communication Channels</a></li>
+                    <li><a href="#contribution-workflow">Contribution Workflow</a></li>
+                    <li><a href="#pull-requests">Pull Request Guidelines</a></li>
+                    <li><a href="#review-process">Review Process</a></li>
+                    <li><a href="#testing">Testing & Quality Assurance</a></li>
+                    <li><a href="#community-resources">Community Resources</a></li>
+                    <li><a href="#advanced-topics">Advanced Topics</a></li>
+                </ul>
+            </div>
+
+            <h2 id="getting-started">🚀 Getting Started</h2>
+
+            <h3>First Steps for New Contributors</h3>
+            <div class="alert alert-warning">
+                <strong>⭐ Recommendation:</strong> Start with reviewing and testing existing PRs rather than opening new ones. This is the most effective way to learn the codebase and process.
+            </div>
+
+            <h3>Finding Issues to Work On</h3>
+            <pre><code># Good first issues for beginners
+https://github.com/bitcoin/bitcoin/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22
+
+# Issues up for grabs
+https://github.com/bitcoin/bitcoin/issues?q=is%3Aopen+is%3Aissue+label%3A%22Up+for+grabs%22
+
+# Help wanted issues
+https://github.com/bitcoin/bitcoin/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22</code></pre>
+
+            <h3>Development Environment Setup</h3>
+            <pre><code># Clone the repository
+git clone https://github.com/bitcoin/bitcoin.git
+cd bitcoin
+
+# Build Bitcoin Core (example for Unix)
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+make -j$(nproc)
+
+# Run tests to verify your setup
+./bin/test_bitcoin
+python3 ../test/functional/test_runner.py</code></pre>
+
+            <h2 id="communication">💬 Communication Channels</h2>
+
+            <h3>IRC Channels (Libera Chat)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Purpose</th>
+                        <th>Who Should Join</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>#bitcoin-core-dev</strong></td>
+                        <td>Main development discussion</td>
+                        <td>All developers and contributors</td>
+                    </tr>
+                    <tr>
+                        <td><strong>#bitcoin-core-pr-reviews</strong></td>
+                        <td>PR Review Club meetings</td>
+                        <td>Contributors learning review process</td>
+                    </tr>
+                    <tr>
+                        <td><strong>#bitcoin-core-builds</strong></td>
+                        <td>Build system and releases</td>
+                        <td>Build system contributors</td>
+                    </tr>
+                    <tr>
+                        <td><strong>#bitcoin-core-gui</strong></td>
+                        <td>GUI development</td>
+                        <td>GUI contributors</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Accessing IRC</h3>
+            <pre><code># Web client (easiest way to start)
+https://web.libera.chat/#bitcoin-core-dev
+
+# IRC logs and history
+https://www.erisian.com.au/bitcoin-core-dev/
+https://gnusha.org/bitcoin-core-dev/</code></pre>
+
+            <h3>Mailing Lists</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Bitcoin Development Mailing List</h4>
+                <p><strong>Purpose:</strong> Discussion of complex or controversial consensus and P2P protocol changes</p>
+                <p><strong>Subscribe:</strong> <a href="https://groups.google.com/g/bitcoindev">https://groups.google.com/g/bitcoindev</a></p>
+                <p><strong>Archives:</strong> <a href="https://gnusha.org/pi/bitcoindev/">https://gnusha.org/pi/bitcoindev/</a></p>
+                <p><strong>When to use:</strong> Before working on consensus changes or major protocol modifications</p>
+            </div>
+
+            <h3>Regular Meetings</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Bitcoin Core Development Meetings</h4>
+                <ul>
+                    <li><strong>When:</strong> Weekly on IRC (#bitcoin-core-dev)</li>
+                    <li><strong>Schedule:</strong> <a href="https://github.com/bitcoin-core/bitcoin-devwiki/wiki/General-IRC-meeting">Check current times</a></li>
+                    <li><strong>Purpose:</strong> Coordinate development, discuss high-priority items</li>
+                    <li><strong>Logs:</strong> <a href="https://bitcoincore.org/en/meetings/">Meeting summaries</a></li>
+                </ul>
+            </div>
+
+            <h2 id="contribution-workflow">🔄 Contribution Workflow</h2>
+
+            <h3>The Standard Process</h3>
+            <ol>
+                <li><strong>Fork the repository</strong> (only needed once)</li>
+                <li><strong>Create a topic branch</strong> for your changes</li>
+                <li><strong>Make atomic commits</strong> with clear messages</li>
+                <li><strong>Push to your fork</strong> and create a pull request</li>
+                <li><strong>Address review feedback</strong> through discussion and updates</li>
+                <li><strong>Squash commits</strong> if requested by reviewers</li>
+            </ol>
+
+            <h3>Repository Selection</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Which repository to use:</h4>
+                <ul>
+                    <li><strong>GUI-only changes:</strong> <a href="https://github.com/bitcoin-core/gui">https://github.com/bitcoin-core/gui</a></li>
+                    <li><strong>Everything else:</strong> <a href="https://github.com/bitcoin/bitcoin">https://github.com/bitcoin/bitcoin</a></li>
+                    <li><strong>Global refactoring:</strong> Main repository even if it touches GUI</li>
+                </ul>
+            </div>
+
+            <h3>Commit Guidelines</h3>
+            <pre><code># Commit message format
+component: Short description (50 chars max)
+
+Detailed explanation of what and why, not how.
+Can span multiple lines and include technical details.
+
+# Examples:
+consensus: Add new opcode for BIP-XXXX OP_CHECKAWESOMESIG
+net: Automatically create onion service, listen on Tor
+qt: Add fee bump button
+log: Fix typo in log message</code></pre>
+
+            <h2 id="pull-requests">📤 Pull Request Guidelines</h2>
+
+            <h3>PR Title Prefixes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Prefix</th>
+                        <th>Usage</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>consensus</code></td>
+                        <td>Consensus critical code</td>
+                        <td>consensus: Add new opcode validation</td>
+                    </tr>
+                    <tr>
+                        <td><code>net</code> / <code>p2p</code></td>
+                        <td>Peer-to-peer network code</td>
+                        <td>net: Improve peer discovery</td>
+                    </tr>
+                    <tr>
+                        <td><code>rpc</code> / <code>rest</code></td>
+                        <td>RPC and REST APIs</td>
+                        <td>rpc: Add new wallet endpoint</td>
+                    </tr>
+                    <tr>
+                        <td><code>wallet</code></td>
+                        <td>Wallet functionality</td>
+                        <td>wallet: Improve coin selection</td>
+                    </tr>
+                    <tr>
+                        <td><code>qt</code> / <code>gui</code></td>
+                        <td>GUI changes</td>
+                        <td>qt: Add dark mode support</td>
+                    </tr>
+                    <tr>
+                        <td><code>test</code> / <code>qa</code></td>
+                        <td>Tests and QA</td>
+                        <td>test: Add functional test for feature</td>
+                    </tr>
+                    <tr>
+                        <td><code>build</code></td>
+                        <td>Build system</td>
+                        <td>build: Update CMake requirements</td>
+                    </tr>
+                    <tr>
+                        <td><code>doc</code></td>
+                        <td>Documentation</td>
+                        <td>doc: Update developer notes</td>
+                    </tr>
+                    <tr>
+                        <td><code>refactor</code></td>
+                        <td>Code refactoring</td>
+                        <td>refactor: Extract common validation logic</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>PR Description Requirements</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Your PR description should include:</h4>
+                <ul>
+                    <li><strong>What:</strong> Clear description of the change</li>
+                    <li><strong>Why:</strong> Justification and motivation</li>
+                    <li><strong>How:</strong> Technical approach (if not obvious)</li>
+                    <li><strong>Testing:</strong> How you tested the change</li>
+                    <li><strong>References:</strong> Related issues, discussions, BIPs</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ Avoid @mentions:</strong> Don't include @username mentions in PR descriptions as they'll be preserved in commit messages and notify users every time the code is copied.
+            </div>
+
+            <h3>Work in Progress PRs</h3>
+            <pre><code># Mark incomplete PRs with [WIP] prefix
+[WIP] rpc: Add new transaction analysis endpoint
+
+# Or use GitHub's draft PR feature
+# Click "Create draft pull request" instead of "Create pull request"</code></pre>
+
+            <h2 id="review-process">🔍 Review Process</h2>
+
+            <h3>Types of Review</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Conceptual Review</h4>
+                <ul>
+                    <li><strong>Concept ACK:</strong> "I agree with the general goal"</li>
+                    <li><strong>Concept NACK:</strong> "I disagree with this approach" (requires rationale)</li>
+                    <li><strong>Approach ACK:</strong> "I agree with the implementation approach"</li>
+                    <li><strong>Approach NACK:</strong> "Different approach needed" (with reasoning)</li>
+                </ul>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Code Review</h4>
+                <ul>
+                    <li><strong>ACK [commit-hash]:</strong> "I have reviewed and tested the code"</li>
+                    <li><strong>NACK:</strong> "I object to this change" (with detailed reasoning)</li>
+                    <li><strong>Tested ACK:</strong> "I have tested the functionality manually"</li>
+                    <li><strong>Code review ACK:</strong> "Code looks good but I haven't tested"</li>
+                </ul>
+            </div>
+
+            <h3>Review Standards</h3>
+            <div class="alert alert-info">
+                <h4>All PRs must:</h4>
+                <ul>
+                    <li>Have a clear use case or fix a demonstrable bug</li>
+                    <li>Be well peer-reviewed</li>
+                    <li>Include appropriate tests</li>
+                    <li>Follow code style guidelines</li>
+                    <li>Not break existing test suite</li>
+                    <li>Update relevant documentation</li>
+                </ul>
+            </div>
+
+            <h3>Consensus Changes</h3>
+            <div class="alert alert-danger">
+                <strong>🚨 Special Requirements for Consensus Changes:</strong>
+                <ul>
+                    <li>Must be preceded by extensive mailing list discussion</li>
+                    <li>Require a numbered BIP (Bitcoin Improvement Proposal)</li>
+                    <li>Need widespread technical consensus</li>
+                    <li>Higher review standards and longer timeline</li>
+                    <li>Consider using Bitcoin Inquisition for testing first</li>
+                </ul>
+            </div>
+
+            <h3>Finding Reviewers</h3>
+            <pre><code># Use git blame to find relevant experts
+git blame src/wallet/wallet.cpp
+
+# Check recent commits in related areas
+git log --oneline --author="maintainer-name" src/net/
+
+# Join IRC and politely ask for review
+# Wait at least a week before following up</code></pre>
+
+            <h2 id="testing">🧪 Testing & Quality Assurance</h2>
+
+            <h3>Test Types</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Test Type</th>
+                        <th>Command</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Unit Tests</td>
+                        <td><code>./bin/test_bitcoin</code></td>
+                        <td>Test individual functions/classes</td>
+                    </tr>
+                    <tr>
+                        <td>Functional Tests</td>
+                        <td><code>test/functional/test_runner.py</code></td>
+                        <td>End-to-end integration testing</td>
+                    </tr>
+                    <tr>
+                        <td>Fuzz Tests</td>
+                        <td><code>./bin/test_bitcoin -fuzz</code></td>
+                        <td>Find crashes and undefined behavior</td>
+                    </tr>
+                    <tr>
+                        <td>Util Tests</td>
+                        <td><code>test/util/test_runner.py</code></td>
+                        <td>Test utility scripts</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Test Writing Guidelines</h3>
+            <pre><code># Unit test example location
+src/test/wallet_tests.cpp
+
+# Functional test example location
+test/functional/wallet_basic.py
+
+# Test naming convention
+test_feature_description.py
+test_rpc_command_validation.py
+
+# Running specific tests
+./bin/test_bitcoin --log_level=all --run_test=wallet_tests
+test/functional/wallet_basic.py</code></pre>
+
+            <h3>Manual QA Testing</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Testing Checklist:</h4>
+                <ul>
+                    <li>Test on multiple operating systems if possible</li>
+                    <li>Verify backward compatibility</li>
+                    <li>Test edge cases and error conditions</li>
+                    <li>Validate RPC interface changes</li>
+                    <li>Check for performance regressions</li>
+                    <li>Test with different configuration options</li>
+                </ul>
+            </div>
+
+            <h2 id="community-resources">🌟 Community Resources</h2>
+
+            <h3>Bitcoin Core PR Review Club</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>What is it?</h4>
+                <p>A monthly club for reviewing Bitcoin Core PRs in IRC. Perfect for learning the review process!</p>
+                
+                <h4>Details:</h4>
+                <ul>
+                    <li><strong>When:</strong> First Wednesday and Thursday of each month, 17:00 UTC</li>
+                    <li><strong>Where:</strong> #bitcoin-core-pr-reviews on Libera Chat</li>
+                    <li><strong>Website:</strong> <a href="https://bitcoincore.reviews/">https://bitcoincore.reviews/</a></li>
+                    <li><strong>Who should attend:</strong> Anyone learning Bitcoin Core development</li>
+                </ul>
+            </div>
+
+            <h3>Essential Reading</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>📚 Must-Read Documents:</h4>
+                <ul>
+                    <li><strong>Contributing Guide:</strong> <a href="https://github.com/bitcoin/bitcoin/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a></li>
+                    <li><strong>Developer Notes:</strong> <a href="https://github.com/bitcoin/bitcoin/blob/master/doc/developer-notes.md">doc/developer-notes.md</a></li>
+                    <li><strong>Productivity Tips:</strong> <a href="https://github.com/bitcoin/bitcoin/blob/master/doc/productivity.md">doc/productivity.md</a></li>
+                    <li><strong>Bitcoin Whitepaper:</strong> <a href="https://bitcoin.org/bitcoin.pdf">bitcoin.org/bitcoin.pdf</a></li>
+                </ul>
+            </div>
+
+            <h3>External Learning Resources</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>🎓 Recommended Blog Posts & Guides:</h4>
+                <ul>
+                    <li><a href="https://bitcointechtalk.com/a-gentle-introduction-to-bitcoin-core-development-fdc95eaee6b8">A Gentle Introduction to Bitcoin Core Development</a> - Jimmy Song</li>
+                    <li><a href="https://bitcointechtalk.com/contributing-to-bitcoin-core-a-personal-account-35f3a594340b">Contributing to Bitcoin Core - a Personal Account</a> - John Newbery</li>
+                    <li><a href="https://medium.com/@amitiu/onboarding-to-bitcoin-core-7c1a83b20db2">Onboarding to Bitcoin Core</a> - Amiti Uttarwar</li>
+                    <li><a href="https://jonatack.github.io/articles/how-to-review-pull-requests-in-bitcoin-core">How to Review Pull Requests in Bitcoin Core</a> - Jon Atack</li>
+                </ul>
+            </div>
+
+            <h3>Additional Resources</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>🔗 Useful Links:</h4>
+                <ul>
+                    <li><strong>Bitcoin Core Website:</strong> <a href="https://bitcoincore.org/">bitcoincore.org</a></li>
+                    <li><strong>BIPs Repository:</strong> <a href="https://github.com/bitcoin/bips">github.com/bitcoin/bips</a></li>
+                    <li><strong>Bitcoin Stack Exchange:</strong> <a href="https://bitcoin.stackexchange.com/">bitcoin.stackexchange.com</a></li>
+                    <li><strong>Bitcoin Core Academy:</strong> <a href="https://bitcoincore.academy/">bitcoincore.academy</a></li>
+                    <li><strong>Optech Newsletter:</strong> <a href="https://bitcoinops.org/">bitcoinops.org</a></li>
+                </ul>
+            </div>
+
+            <h2 id="advanced-topics">🎓 Advanced Topics</h2>
+
+            <h3>Release Process</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Testing Release Candidates:</h4>
+                <ul>
+                    <li>Major releases happen every 6-8 months</li>
+                    <li>Release candidates need thorough testing</li>
+                    <li>Special testing guides are provided for each RC</li>
+                    <li>Testing RCs is a valuable contribution opportunity</li>
+                </ul>
+            </div>
+
+            <h3>Backporting</h3>
+            <pre><code># Security and bug fixes can be backported
+# Maintainers handle backports in batches
+# Original author doesn't need to worry about it
+
+# Backport metadata format:
+Github-Pull: #12345
+Rebased-From: abc123def456
+</code></pre>
+
+            <h3>Specialized Areas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Key Concepts</th>
+                        <th>Getting Started</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Consensus</td>
+                        <td>Validation, soft forks, chain rules</td>
+                        <td>Study existing validation code</td>
+                    </tr>
+                    <tr>
+                        <td>P2P Network</td>
+                        <td>Protocol messages, peer management</td>
+                        <td>Read net/ directory, test with functional tests</td>
+                    </tr>
+                    <tr>
+                        <td>Wallet</td>
+                        <td>Key management, coin selection, signing</td>
+                        <td>Start with wallet/ directory and RPC calls</td>
+                    </tr>
+                    <tr>
+                        <td>GUI</td>
+                        <td>Qt framework, user interfaces</td>
+                        <td>Familiar with C++ and Qt development</td>
+                    </tr>
+                    <tr>
+                        <td>Build System</td>
+                        <td>CMake, dependencies, cross-compilation</td>
+                        <td>Understand build processes and packaging</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Security Considerations</h3>
+            <div class="alert alert-danger">
+                <h4>🔒 Security Guidelines:</h4>
+                <ul>
+                    <li><strong>Never test with real Bitcoin on mainnet</strong></li>
+                    <li><strong>Use regtest or signet for testing</strong></li>
+                    <li><strong>Report security issues privately</strong> via security@bitcoincore.org</li>
+                    <li><strong>Follow responsible disclosure</strong> for vulnerabilities</li>
+                    <li><strong>Be cautious with consensus changes</strong></li>
+                </ul>
+            </div>
+
+            <h2>🎯 Best Practices Summary</h2>
+
+            <div class="alert alert-info">
+                <h3>💡 Key Success Factors:</h3>
+                <ul>
+                    <li><strong>Start small:</strong> Begin with reviews and small fixes</li>
+                    <li><strong>Communicate early:</strong> Discuss ideas before implementing</li>
+                    <li><strong>Be patient:</strong> Quality review takes time</li>
+                    <li><strong>Stay humble:</strong> Learn from feedback</li>
+                    <li><strong>Test thoroughly:</strong> Quality over speed</li>
+                    <li><strong>Join the community:</strong> Participate in IRC and discussions</li>
+                    <li><strong>Read the code:</strong> Understanding the codebase is crucial</li>
+                    <li><strong>Follow conventions:</strong> Consistency matters</li>
+                </ul>
+            </div>
+
+            <h3>Communication Etiquette</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>🤝 Professional Interaction:</h4>
+                <ul>
+                    <li>Be respectful and constructive in all communications</li>
+                    <li>Many contributors are volunteers - be patient</li>
+                    <li>Give people 3-7 days to respond before following up</li>
+                    <li>Focus on technical merit, not personal preferences</li>
+                    <li>Acknowledge and thank reviewers for their time</li>
+                    <li>Be open to criticism and alternative approaches</li>
+                </ul>
+            </div>
+
+            <h3>Time Investment Expectations</h3>
+            <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>⏰ Realistic Timeline Expectations:</h4>
+                <ul>
+                    <li><strong>Small fixes:</strong> 1-4 weeks from PR to merge</li>
+                    <li><strong>Medium features:</strong> 1-6 months</li>
+                    <li><strong>Large features:</strong> 6+ months</li>
+                    <li><strong>Consensus changes:</strong> 1+ years</li>
+                    <li><strong>Learning curve:</strong> 3-6 months to become effective</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-info">
+                <h3>🎉 Ready to Contribute?</h3>
+                <p>Here's what to do next:</p>
+                <ol>
+                    <li>Set up your development environment</li>
+                    <li>Join #bitcoin-core-dev on IRC</li>
+                    <li>Attend a PR Review Club meeting</li>
+                    <li>Find a "good first issue" to work on</li>
+                    <li>Start reviewing other contributors' PRs</li>
+                </ol>
+                <p><strong>Remember:</strong> The Bitcoin Core community values quality, security, and consensus. Take your time, learn continuously, and contribute thoughtfully!</p>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p><a href="index.html" style="color: rgba(255,255,255,0.8);">← Back to Documentation Hub</a></p>
+        </footer>
+    </div>
+</body>
+</html> 

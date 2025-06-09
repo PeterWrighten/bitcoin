@@ -1,0 +1,388 @@
+/* Bitcoin Core Documentation - Elegant Styling */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #2c3e50;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 3em;
+    font-weight: 700;
+    background: linear-gradient(45deg, #f7931e, #ff6b35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.header .subtitle {
+    font-size: 1.2em;
+    color: #7f8c8d;
+    font-weight: 300;
+}
+
+/* Navigation */
+.nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.nav-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid transparent;
+}
+
+.nav-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    border-color: #f7931e;
+}
+
+.nav-card .icon {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.nav-card h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.nav-card p {
+    color: #7f8c8d;
+    font-size: 0.95em;
+}
+
+.nav-card .badge {
+    display: inline-block;
+    background: #f7931e;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    margin-top: 10px;
+}
+
+/* Content Pages */
+.content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.content h1 {
+    color: #2c3e50;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #f7931e;
+}
+
+.content h2 {
+    color: #34495e;
+    font-size: 1.8em;
+    margin: 30px 0 15px 0;
+    padding-left: 15px;
+    border-left: 4px solid #f7931e;
+}
+
+.content h3 {
+    color: #2c3e50;
+    font-size: 1.4em;
+    margin: 25px 0 10px 0;
+}
+
+.content p {
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+.content ul, .content ol {
+    margin: 15px 0 15px 30px;
+}
+
+.content li {
+    margin-bottom: 8px;
+}
+
+/* Code Blocks - Enhanced */
+.content pre {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 24px;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 20px 0;
+    border-left: 4px solid #f7931e;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: relative;
+}
+
+.content pre:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.content code {
+    background: #f8f9fa;
+    color: #d73a49;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 13px;
+    border: 1px solid #e1e4e8;
+}
+
+.content pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border: none;
+}
+
+/* Copy-to-clipboard indicator */
+.content pre::before {
+    content: "💻 Terminal";
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 11px;
+    color: #888;
+    opacity: 0.7;
+}
+
+/* Tables - Enhanced */
+.content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    font-size: 14px;
+}
+
+.content th, .content td {
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.content th {
+    background: linear-gradient(135deg, #f7931e, #ff9500);
+    font-weight: 600;
+    color: white;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.content tr:hover {
+    background: #f8f9fa;
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+
+.content tr:nth-child(even) {
+    background: #fbfcfd;
+}
+
+.content td code {
+    background: #e9ecef;
+    color: #495057;
+    font-size: 12px;
+}
+
+/* Alerts */
+.alert {
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid;
+}
+
+.alert-info {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+/* Back Button */
+.back-btn {
+    display: inline-block;
+    background: linear-gradient(45deg, #f7931e, #ff6b35);
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(247, 147, 30, 0.3);
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(247, 147, 30, 0.4);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 30px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header h1 {
+        font-size: 2.2em;
+    }
+    
+    .nav-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .content {
+        padding: 25px;
+    }
+    
+    .content h1 {
+        font-size: 2em;
+    }
+}
+
+/* Enhanced content styling */
+.content h4 {
+    color: #2c3e50;
+    font-size: 1.2em;
+    margin: 20px 0 10px 0;
+    font-weight: 600;
+}
+
+.content blockquote {
+    background: #f8f9fa;
+    border-left: 4px solid #f7931e;
+    padding: 15px 20px;
+    margin: 20px 0;
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* Info boxes styling */
+.content div[style*="background: #f8f9fa"] {
+    background: #f8f9fa !important;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.content div[style*="background: #fff3cd"] {
+    background: #fff3cd !important;
+    border: 1px solid #ffeaa7;
+    border-left: 4px solid #fdcb6e;
+}
+
+.content div[style*="background: #f8d7da"] {
+    background: #f8d7da !important;
+    border: 1px solid #f5c6cb;
+    border-left: 4px solid #e74c3c;
+}
+
+/* Improved typography */
+.content p {
+    line-height: 1.7;
+    margin-bottom: 16px;
+}
+
+.content strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Syntax highlighting for code */
+.bash { color: #f39c12; }
+.comment { color: #95a5a6; }
+.string { color: #2ecc71; }
+.keyword { color: #3498db; }
+
+/* Scrollbar styling for code blocks */
+.content pre::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.content pre::-webkit-scrollbar-track {
+    background: #2c3e50;
+    border-radius: 4px;
+}
+
+.content pre::-webkit-scrollbar-thumb {
+    background: #f7931e;
+    border-radius: 4px;
+}
+
+.content pre::-webkit-scrollbar-thumb:hover {
+    background: #e67e22;
+} 

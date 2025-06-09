@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Core Pruning Reference</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Documentation Hub</a>
+        
+        <div class="content">
+            <h1>🗜️ Bitcoin Core Pruning Reference</h1>
+            
+            <h2>What is Pruning?</h2>
+            <p>Pruning allows Bitcoin Core to delete old block data after validating it, keeping only recent blocks. The node still validates everything but saves storage space.</p>
+
+            <h2>📐 Pruning Size Options</h2>
+            
+            <h3>Command Line Arguments</h3>
+            <pre><code># Minimum pruning (550MB)
+./bin/bitcoind -prune=550
+
+# Recommended pruning (2GB) 
+./bin/bitcoind -prune=2000
+
+# Custom size (5GB)
+./bin/bitcoind -prune=5000
+
+# With optimizations
+./bin/bitcoind -prune=2000 -maxconnections=8 -dbcache=100 -maxuploadtarget=1000</code></pre>
+
+            <h3>Configuration File Options</h3>
+            <pre><code># In bitcoin.conf:
+prune=2000                 # Enable pruning with 2GB limit
+# OR
+prune=1                    # Enable automatic pruning (uses default ~550MB)</code></pre>
+
+            <h2>🎯 Pruning Levels</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Storage</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>prune=550</code></td>
+                        <td>~550MB</td>
+                        <td>Absolute minimum</td>
+                    </tr>
+                    <tr>
+                        <td><code>prune=1000</code></td>
+                        <td>~1GB</td>
+                        <td>Light usage</td>
+                    </tr>
+                    <tr style="background-color: #fff3cd;">
+                        <td><code>prune=2000</code></td>
+                        <td>~2GB</td>
+                        <td><strong>Recommended</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>prune=5000</code></td>
+                        <td>~5GB</td>
+                        <td>More historical data</td>
+                    </tr>
+                    <tr>
+                        <td><code>prune=10000</code></td>
+                        <td>~10GB</td>
+                        <td>Extended history</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>🚀 Starting Methods</h2>
+            
+            <h3>1. Command Line Only</h3>
+            <pre><code># Start with pruning
+./bin/bitcoind -prune=2000 -daemon
+
+# Stop node
+./bin/bitcoin-cli stop
+
+# Restart with different pruning
+./bin/bitcoind -prune=1000 -daemon</code></pre>
+
+            <h3>2. With Config File</h3>
+            <pre><code># Create config file with prune=2000
+echo "prune=2000" > ~/Library/Application\ Support/Bitcoin/bitcoin.conf
+
+# Start normally (reads config)
+./bin/bitcoind -daemon</code></pre>
+
+            <h3>3. Mixed (Config + Command Line)</h3>
+            <pre><code># Config file has basic settings
+# Command line overrides specific options
+./bin/bitcoind -daemon -prune=5000  # Overrides config file prune setting</code></pre>
+
+            <h2>⚠️ Important Notes</h2>
+            
+            <h3>Pruning Limitations</h3>
+            <div class="alert alert-danger">
+                <ul>
+                    <li>❌ <strong>Cannot rescan old blocks</strong> (if importing old wallets)</li>
+                    <li>❌ <strong>Cannot serve historical blocks</strong> to other nodes</li>
+                    <li>❌ <strong>Some wallet recovery features limited</strong></li>
+                </ul>
+            </div>
+            
+            <div class="alert alert-info">
+                <ul>
+                    <li>✅ <strong>Full validation</strong> still occurs</li>
+                    <li>✅ <strong>All current functionality</strong> works</li>
+                    <li>✅ <strong>Can upgrade to full node</strong> later</li>
+                </ul>
+            </div>
+
+            <h3>Changing Pruning Settings</h3>
+            <pre><code># To change pruning size, you must restart bitcoind
+./bin/bitcoin-cli stop
+./bin/bitcoind -prune=5000 -daemon  # New size</code></pre>
+
+            <h3>Disabling Pruning (Convert to Full Node)</h3>
+            <div class="alert alert-warning">
+                <strong>Warning:</strong> This will redownload the entire blockchain (~500GB)
+            </div>
+            <pre><code># Stop pruned node
+./bin/bitcoin-cli stop
+
+# Remove pruning and redownload everything (WARNING: Takes days)
+./bin/bitcoind -daemon  # No -prune argument
+
+# Or explicitly disable in config:
+# prune=0  # In bitcoin.conf</code></pre>
+
+            <h2>📊 Monitoring Pruned Nodes</h2>
+            
+            <h3>Check Pruning Status</h3>
+            <pre><code># Show pruning info
+./bin/bitcoin-cli getblockchaininfo | grep -E "(pruned|prune)"
+
+# Current storage usage
+du -sh ~/Library/Application\ Support/Bitcoin/</code></pre>
+
+            <h3>Key Fields in getblockchaininfo</h3>
+            <pre><code>{
+  "pruned": true,                    // Pruning enabled
+  "pruneheight": 845000,            // Oldest block kept
+  "prune_target_size": 2097152000,  // Target size in bytes (2GB)
+  "size_on_disk": 1987654321        // Current actual size
+}</code></pre>
+
+            <h2>🎯 Recommended Configurations</h2>
+            
+            <h3>For Developers</h3>
+            <pre><code>./bin/bitcoind -prune=2000 -daemon -maxconnections=8 -dbcache=200</code></pre>
+
+            <h3>For Minimal Systems</h3>
+            <pre><code>./bin/bitcoind -prune=550 -daemon -maxconnections=4 -dbcache=50</code></pre>
+
+            <h3>For Better Performance</h3>
+            <pre><code>./bin/bitcoind -prune=5000 -daemon -maxconnections=16 -dbcache=500</code></pre>
+
+            <h2>🛠️ Troubleshooting</h2>
+            
+            <h3>If Pruning Fails</h3>
+            <pre><code># Check disk space
+df -h
+
+# Check config
+./bin/bitcoin-cli getblockchaininfo
+
+# Restart with explicit settings
+./bin/bitcoin-cli stop
+./bin/bitcoind -prune=2000 -daemon</code></pre>
+
+            <h3>Common Issues</h3>
+            <div class="alert alert-warning">
+                <ol>
+                    <li><strong>"Insufficient space"</strong> - Increase prune value or free disk space</li>
+                    <li><strong>"Cannot decrease prune"</strong> - Must restart with smaller value</li>
+                    <li><strong>"Wallet rescan failed"</strong> - Pruning prevents rescanning old blocks</li>
+                </ol>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Bottom Line:</strong> Pruning gives you full Bitcoin validation security with minimal storage requirements!
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p><a href="index.html" style="color: rgba(255,255,255,0.8);">← Back to Documentation Hub</a></p>
+        </footer>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Core Monitoring Tools</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Documentation Hub</a>
+        
+        <div class="content">
+            <h1>📊 Bitcoin Core Monitoring Tools</h1>
+            <p>Real-time monitoring scripts and commands for tracking sync progress, network status, and system resources</p>
+
+            <div class="alert alert-info">
+                <strong>💡 Purpose:</strong> These tools help you monitor your Bitcoin node's health, sync progress, and system performance in real-time.
+            </div>
+
+            <h2>🚀 Automated Monitoring Scripts</h2>
+            
+            <h3>📈 Sync Progress Monitor</h3>
+            <p>Use the <code>monitor_sync.sh</code> script for continuous sync monitoring:</p>
+            <pre><code># Run the sync monitor
+../monitor_sync.sh
+
+# Make it executable if needed
+chmod +x ../monitor_sync.sh</code></pre>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Script Features:</h4>
+                <ul>
+                    <li>🔄 Real-time sync percentage</li>
+                    <li>📊 Block validation progress</li>
+                    <li>💾 Storage usage tracking</li>
+                    <li>⏱️ Estimated time remaining</li>
+                    <li>🔗 Network peer count</li>
+                </ul>
+            </div>
+
+            <h3>🌐 Network & Threads Monitor</h3>
+            <p>Monitor network connections and system threads:</p>
+            <pre><code># Run comprehensive network monitoring
+../network_threads_monitor.sh
+
+# Monitor in background and log to file
+../network_threads_monitor.sh > monitoring.log 2>&1 &</code></pre>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4>Network Monitor Shows:</h4>
+                <ul>
+                    <li>🔗 Active peer connections</li>
+                    <li>⚡ Thread count and distribution</li>
+                    <li>📊 Network traffic statistics</li>
+                    <li>🏛️ Node service status</li>
+                    <li>💻 System resource usage</li>
+                </ul>
+            </div>
+
+            <h2>⚡ Real-Time Commands</h2>
+
+            <h3>📊 Essential Status Commands</h3>
+            <pre><code># Quick status overview
+./bin/bitcoin-cli getblockchaininfo | head -20
+
+# Network connection status
+./bin/bitcoin-cli getconnectioncount
+
+# Memory pool information
+./bin/bitcoin-cli getmempoolinfo
+
+# Sync verification progress
+./bin/bitcoin-cli getblockchaininfo | grep verificationprogress</code></pre>
+
+            <h3>🔍 Detailed Diagnostics</h3>
+            <pre><code># Comprehensive node information
+./bin/bitcoin-cli getinfo 2>/dev/null || echo "Use getblockchaininfo instead"
+
+# Peer connection details
+./bin/bitcoin-cli getpeerinfo | head -50
+
+# Network statistics
+./bin/bitcoin-cli getnettotals
+
+# Chain tips information
+./bin/bitcoin-cli getchaintips</code></pre>
+
+            <h3>💾 Storage & Resource Monitoring</h3>
+            <pre><code># Check data directory size
+du -sh ~/Library/Application\ Support/Bitcoin/
+
+# Detailed storage breakdown
+du -h ~/Library/Application\ Support/Bitcoin/ | sort -hr | head -10
+
+# Live log monitoring
+tail -f ~/Library/Application\ Support/Bitcoin/debug.log
+
+# Error log filtering
+grep -i error ~/Library/Application\ Support/Bitcoin/debug.log | tail -20</code></pre>
+
+            <h2>📈 Performance Metrics Dashboard</h2>
+
+            <h3>Creating a Custom Monitoring Dashboard</h3>
+            <p>Create a simple dashboard script:</p>
+            <pre><code># Create monitoring dashboard
+cat > dashboard.sh << 'EOF'
+#!/bin/bash
+clear
+echo "=== Bitcoin Core Node Dashboard ==="
+echo "Timestamp: $(date)"
+echo ""
+
+# Blockchain info
+echo "📊 BLOCKCHAIN STATUS:"
+./bin/bitcoin-cli getblockchaininfo | grep -E "(blocks|headers|verificationprogress|pruned|size_on_disk)"
+echo ""
+
+# Network status  
+echo "🌐 NETWORK STATUS:"
+echo "Connections: $(./bin/bitcoin-cli getconnectioncount)"
+./bin/bitcoin-cli getnetworkinfo | grep -E "(version|subversion|localservices)"
+echo ""
+
+# Memory pool
+echo "💾 MEMPOOL:"
+./bin/bitcoin-cli getmempoolinfo | grep -E "(size|bytes|usage)"
+echo ""
+
+# Storage
+echo "🗂️ STORAGE:"
+echo "Data dir size: $(du -sh ~/Library/Application\ Support/Bitcoin/ | cut -f1)"
+echo ""
+
+# System resources
+echo "💻 SYSTEM:"
+echo "Processes: $(ps aux | grep bitcoind | grep -v grep | wc -l)"
+echo "Threads: $(ps -M $(pgrep bitcoind) 2>/dev/null | wc -l || echo 'N/A')"
+EOF
+
+chmod +x dashboard.sh</code></pre>
+
+            <h3>Running the Dashboard</h3>
+            <pre><code># Run once
+./dashboard.sh
+
+# Run every 30 seconds
+watch -n 30 ./dashboard.sh
+
+# Log to file with timestamps
+while true; do ./dashboard.sh >> node_status.log; sleep 60; done &</code></pre>
+
+            <h2>🚨 Alert System Setup</h2>
+
+            <h3>Sync Stall Detection</h3>
+            <pre><code># Create sync stall monitor
+cat > check_sync_stall.sh << 'EOF'
+#!/bin/bash
+PROGRESS1=$(./bin/bitcoin-cli getblockchaininfo | grep verificationprogress | cut -d: -f2 | cut -d, -f1 | tr -d ' ')
+sleep 300  # Wait 5 minutes
+PROGRESS2=$(./bin/bitcoin-cli getblockchaininfo | grep verificationprogress | cut -d: -f2 | cut -d, -f1 | tr -d ' ')
+
+if (( $(echo "$PROGRESS1 == $PROGRESS2" | bc -l) )); then
+    echo "WARNING: Sync appears stalled at $PROGRESS1"
+    # Add notification command here (email, slack, etc.)
+fi
+EOF
+
+chmod +x check_sync_stall.sh</code></pre>
+
+            <h3>Connection Monitor</h3>
+            <pre><code># Monitor peer connections
+cat > check_connections.sh << 'EOF'
+#!/bin/bash
+CONNECTIONS=$(./bin/bitcoin-cli getconnectioncount)
+if [ "$CONNECTIONS" -lt 3 ]; then
+    echo "WARNING: Only $CONNECTIONS peer connections (minimum recommended: 8)"
+    # Add notification here
+fi
+EOF
+
+chmod +x check_connections.sh</code></pre>
+
+            <h2>📊 Log Analysis Tools</h2>
+
+            <h3>Log Filtering & Analysis</h3>
+            <pre><code># Show recent errors
+grep -i error ~/Library/Application\ Support/Bitcoin/debug.log | tail -10
+
+# Network connection logs
+grep "New outbound peer connected" ~/Library/Application\ Support/Bitcoin/debug.log | tail -5
+
+# Block validation progress
+grep "UpdateTip" ~/Library/Application\ Support/Bitcoin/debug.log | tail -5
+
+# Memory usage logs
+grep -i "cache" ~/Library/Application\ Support/Bitcoin/debug.log | tail -10</code></pre>
+
+            <h3>Performance Analysis</h3>
+            <pre><code># Find slow operations
+grep -E "(took|ms)" ~/Library/Application\ Support/Bitcoin/debug.log | tail -10
+
+# Network latency analysis
+grep "ping" ~/Library/Application\ Support/Bitcoin/debug.log | tail -10
+
+# I/O related messages
+grep -E "(disk|write|read)" ~/Library/Application\ Support/Bitcoin/debug.log | tail -10</code></pre>
+
+            <h2>🔧 Troubleshooting Tools</h2>
+
+            <h3>Network Diagnostics</h3>
+            <pre><code># Test specific peer connection
+./bin/bitcoin-cli addnode "1.2.3.4:8333" "add"
+
+# List banned peers
+./bin/bitcoin-cli listbanned
+
+# Clear banned peers
+./bin/bitcoin-cli clearbanned
+
+# Force peer disconnection
+./bin/bitcoin-cli disconnectnode "1.2.3.4:8333"</code></pre>
+
+            <h3>Performance Diagnostics</h3>
+            <pre><code># Check wallet performance
+./bin/bitcoin-cli getwalletinfo | grep -E "(txcount|keypoolsize|scanning)"
+
+# Estimate fee for transaction
+./bin/bitcoin-cli estimatesmartfee 6
+
+# Check transaction in mempool
+./bin/bitcoin-cli getmempoolentry "transaction_id"</code></pre>
+
+            <h2>📱 Mobile-Friendly Monitoring</h2>
+
+            <h3>SSH-Friendly Status Check</h3>
+            <pre><code># One-liner status check for mobile
+./bin/bitcoin-cli getblockchaininfo | grep -E "(blocks|verificationprogress)" && echo "Peers: $(./bin/bitcoin-cli getconnectioncount)"
+
+# Compact dashboard for mobile
+printf "Blocks: %s/%s (%.2f%%) | Peers: %s | Size: %s\n" \
+  $(./bin/bitcoin-cli getblockchaininfo | grep '"blocks"' | cut -d: -f2 | cut -d, -f1 | tr -d ' ') \
+  $(./bin/bitcoin-cli getblockchaininfo | grep '"headers"' | cut -d: -f2 | cut -d, -f1 | tr -d ' ') \
+  $(./bin/bitcoin-cli getblockchaininfo | grep verificationprogress | cut -d: -f2 | cut -d, -f1 | tr -d ' ' | awk '{print $1*100}') \
+  $(./bin/bitcoin-cli getconnectioncount) \
+  $(du -sh ~/Library/Application\ Support/Bitcoin/ | cut -f1)</code></pre>
+
+            <h2>⚙️ Automated Monitoring Setup</h2>
+
+            <h3>Cron Job for Regular Monitoring</h3>
+            <pre><code># Add to crontab (crontab -e)
+# Monitor every 15 minutes
+*/15 * * * * cd /Users/apple/OSS/bitcoin && ./dashboard.sh >> /tmp/bitcoin_monitor.log 2>&1
+
+# Daily storage check
+0 0 * * * cd /Users/apple/OSS/bitcoin && du -sh ~/Library/Application\ Support/Bitcoin/ >> /tmp/bitcoin_storage.log
+
+# Weekly connection analysis
+0 0 * * 0 cd /Users/apple/OSS/bitcoin && ./bin/bitcoin-cli getpeerinfo > /tmp/weekly_peers.log</code></pre>
+
+            <div class="alert alert-info">
+                <h3>💡 Monitoring Best Practices</h3>
+                <ul>
+                    <li><strong>Regular Checks:</strong> Monitor sync progress hourly during initial sync</li>
+                    <li><strong>Log Rotation:</strong> Set up log rotation to prevent disk space issues</li>
+                    <li><strong>Baseline Metrics:</strong> Record normal operating values for comparison</li>
+                    <li><strong>Alert Thresholds:</strong> Set up alerts for connection drops or sync stalls</li>
+                    <li><strong>Resource Monitoring:</strong> Track CPU, memory, and disk usage trends</li>
+                </ul>
+            </div>
+
+            <h2>🔍 Advanced Monitoring</h2>
+
+            <h3>JSON-RPC Monitoring</h3>
+            <pre><code># Monitor RPC response times
+time ./bin/bitcoin-cli getblockchaininfo > /dev/null
+
+# Batch RPC calls for efficiency
+./bin/bitcoin-cli batch '["getblockchaininfo","getconnectioncount","getmempoolinfo"]'</code></pre>
+
+            <h3>System Integration</h3>
+            <pre><code># Monitor with system tools
+# CPU usage of bitcoind
+ps aux | grep bitcoind | grep -v grep
+
+# Memory usage details
+ps -o pid,ppid,user,mem,cpu,command | grep bitcoind
+
+# Network connections by bitcoind
+lsof -p $(pgrep bitcoind) | grep ESTABLISHED | wc -l
+
+# Open file descriptors
+lsof -p $(pgrep bitcoind) | wc -l</code></pre>
+        </div>
+        
+        <footer class="footer">
+            <p><a href="index.html" style="color: rgba(255,255,255,0.8);">← Back to Documentation Hub</a></p>
+        </footer>
+    </div>
+</body>
+</html> 

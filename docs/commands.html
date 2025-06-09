@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Core Commands Reference</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Documentation Hub</a>
+        
+        <div class="content">
+            <h1>⚡ Bitcoin Core - Essential Commands Reference</h1>
+            <p>This document provides quick reference for common Bitcoin Core development commands.</p>
+
+            <h2>🏗️ Building</h2>
+            
+            <h3>Initial Setup (CMake)</h3>
+            <pre><code># Create build directory
+mkdir build && cd build
+
+# Configure build (Release)
+cmake .. -DCMAKE_BUILD_TYPE=Release
+
+# Configure build (Debug)
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+
+# Configure with specific options
+cmake .. -DCMAKE_BUILD_TYPE=Debug \
+         -DWITH_ZMQ=ON \
+         -DENABLE_WALLET=ON \
+         -DBUILD_TESTS=ON</code></pre>
+
+            <h3>Building</h3>
+            <pre><code># Build everything (from build/ directory)
+make -j$(nproc)
+
+# Build specific targets
+make bitcoind          # Bitcoin daemon
+make bitcoin-cli       # Command line interface
+make bitcoin-wallet    # Wallet tool
+make bitcoin-util      # Utility tool
+make test_bitcoin      # Unit tests
+
+# Clean build
+make clean</code></pre>
+
+            <h2>🏃 Running</h2>
+            
+            <h3>Bitcoin Daemon</h3>
+            <pre><code># Start bitcoind (mainnet)
+./bin/bitcoind
+
+# Start with regtest (local testing)
+./bin/bitcoind -regtest
+
+# Start with testnet
+./bin/bitcoind -testnet
+
+# Start with custom datadir
+./bin/bitcoind -datadir=/custom/path
+
+# Run in background
+./bin/bitcoind -daemon
+
+# Stop daemon
+./bin/bitcoin-cli stop</code></pre>
+
+            <h3>Bitcoin CLI (Command Line Interface)</h3>
+            <pre><code># Basic info
+./bin/bitcoin-cli getblockchaininfo
+./bin/bitcoin-cli getwalletinfo
+./bin/bitcoin-cli getpeerinfo
+
+# Wallet operations
+./bin/bitcoin-cli getnewaddress
+./bin/bitcoin-cli getbalance
+./bin/bitcoin-cli sendtoaddress &lt;address&gt; &lt;amount&gt;
+
+# With regtest
+./bin/bitcoin-cli -regtest getblockchaininfo
+
+# Generate blocks (regtest only)
+./bin/bitcoin-cli -regtest generatetoaddress 101 &lt;address&gt;</code></pre>
+
+            <h3>Bitcoin Wallet Tool</h3>
+            <pre><code># Get wallet info
+./bin/bitcoin-wallet -wallet=mywallet info
+
+# Create wallet
+./bin/bitcoin-wallet -wallet=mywallet create
+
+# Dump wallet
+./bin/bitcoin-wallet -wallet=mywallet -dumpfile=backup.dump dump
+
+# Create from dump
+./bin/bitcoin-wallet -wallet=restored -dumpfile=backup.dump createfromdump</code></pre>
+
+            <h2>🧪 Testing</h2>
+            
+            <h3>Unit Tests</h3>
+            <pre><code># Run all unit tests
+./bin/test_bitcoin
+
+# Run specific test suite
+./bin/test_bitcoin -t wallet_tests
+./bin/test_bitcoin -t db_tests
+
+# Run with verbose output
+./bin/test_bitcoin --log_level=all
+
+# List available test suites
+./bin/test_bitcoin --list_content</code></pre>
+
+            <h3>Functional Tests</h3>
+            <pre><code># Run all functional tests
+test/functional/test_runner.py
+
+# Run specific test
+test/functional/wallet_basic.py
+test/functional/tool_wallet.py
+
+# Run multiple tests
+test/functional/test_runner.py wallet_basic.py wallet_multiwallet.py
+
+# Run with different parallelism
+test/functional/test_runner.py -j 4
+
+# Run extended tests (slow)
+test/functional/test_runner.py --extended
+
+# Run without wallet tests
+test/functional/test_runner.py --exclude wallet
+
+# Run specific test with debug output
+test/functional/wallet_basic.py --loglevel=debug</code></pre>
+
+            <h3>Test Categories</h3>
+            <pre><code># Wallet tests
+test/functional/test_runner.py wallet_*
+
+# RPC tests  
+test/functional/test_runner.py rpc_*
+
+# P2P networking tests
+test/functional/test_runner.py p2p_*
+
+# Feature tests
+test/functional/test_runner.py feature_*
+
+# Tool tests
+test/functional/test_runner.py tool_*</code></pre>
+
+            <h2>🔧 Development Workflow</h2>
+            
+            <h3>Git Commands</h3>
+            <pre><code># Create feature branch
+git checkout -b my-feature-branch
+
+# Stage and commit changes
+git add .
+git commit -m "descriptive commit message"
+
+# Push to origin
+git push origin my-feature-branch
+
+# Rebase on master
+git rebase master
+
+# Interactive rebase (squash commits)
+git rebase -i HEAD~3</code></pre>
+
+            <h3>Code Formatting & Linting</h3>
+            <pre><code># Check Python code style
+test/lint/lint-python.py
+
+# Check shell scripts
+test/lint/lint-shell.py
+
+# Check whitespace
+test/lint/lint-whitespace.py
+
+# Check circular dependencies
+test/lint/lint-circular-dependencies.py
+
+# Run all linters
+test/lint/lint-all.py</code></pre>
+
+            <h2>🐛 Debugging</h2>
+            
+            <h3>Debug Build & Run</h3>
+            <pre><code># Build with debug symbols
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+make -j$(nproc)
+
+# Run with debug output
+./bin/bitcoind -debug
+
+# Run with specific debug categories
+./bin/bitcoind -debug=net,http,rpc
+
+# Run with gdb
+gdb --args ./bin/bitcoind -regtest</code></pre>
+
+            <h3>Log Analysis</h3>
+            <pre><code># Monitor debug.log
+tail -f ~/.bitcoin/debug.log
+
+# Search for errors
+grep -i error ~/.bitcoin/debug.log
+
+# Filter by category
+grep "http:" ~/.bitcoin/debug.log</code></pre>
+
+            <h2>🌐 Network Commands</h2>
+            
+            <h3>Regtest Network</h3>
+            <pre><code># Start regtest
+./bin/bitcoind -regtest -daemon
+
+# Create wallet
+./bin/bitcoin-cli -regtest createwallet "test"
+
+# Generate initial blocks
+./bin/bitcoin-cli -regtest generatetoaddress 101 $(./bin/bitcoin-cli -regtest getnewaddress)
+
+# Send transaction
+./bin/bitcoin-cli -regtest sendtoaddress &lt;address&gt; 10
+
+# Mine block with transaction
+./bin/bitcoin-cli -regtest generatetoaddress 1 &lt;mining_address&gt;</code></pre>
+
+            <h2>💡 Tips</h2>
+            <div class="alert alert-info">
+                <ul>
+                    <li><strong>Always test locally</strong> before submitting PRs</li>
+                    <li><strong>Use regtest</strong> for development - it's fast and isolated</li>
+                    <li><strong>Run linters</strong> before committing</li>
+                    <li><strong>Check functional tests</strong> for examples of API usage</li>
+                    <li><strong>Monitor debug.log</strong> when debugging issues</li>
+                    <li><strong>Use meaningful commit messages</strong> following project conventions</li>
+                    <li><strong>Keep commits atomic</strong> - one logical change per commit</li>
+                </ul>
+            </div>
+
+            <h2>🚀 Quick Start Workflow</h2>
+            <pre><code># 1. Build
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+make -j$(nproc)
+
+# 2. Test
+./bin/test_bitcoin
+cd .. && test/functional/test_runner.py
+
+# 3. Run regtest
+./bin/bitcoind -regtest -daemon
+./bin/bitcoin-cli -regtest createwallet "dev"
+
+# 4. Development cycle
+# - Make changes
+# - Run relevant tests
+# - Commit and push</code></pre>
+
+            <div class="alert alert-warning">
+                <strong>Note:</strong> This covers the most commonly used commands for Bitcoin Core development!
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p><a href="index.html" style="color: rgba(255,255,255,0.8);">← Back to Documentation Hub</a></p>
+        </footer>
+    </div>
+</body>
+</html> 
