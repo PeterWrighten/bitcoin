@@ -116,7 +116,7 @@ SQLiteDatabase::SQLiteDatabase(const fs::path& dir_path, const fs::path& file_pa
 {}
 
 SQLiteDatabase::SQLiteDatabase(const fs::path& dir_path, const fs::path& file_path, const DatabaseOptions& options, int additional_flags)
-    : WalletDatabase(), m_dir_path(dir_path), m_file_path(fs::PathToString(file_path)), m_write_semaphore(1), m_use_unsafe_sync(options.use_unsafe_sync)
+    : WalletDatabase(), m_dir_path(dir_path), m_file_path(fs::PathToString(file_path)), m_write_semaphore(1), m_use_unsafe_sync(options.use_unsafe_sync), m_read_only(options.read_only)
 {
     {
         LOCK(g_sqlite_mutex);
@@ -252,7 +252,12 @@ void SQLiteDatabase::Open()
 
 void SQLiteDatabase::Open(int additional_flags)
 {
-    int flags = SQLITE_OPEN_FULLMUTEX | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | additional_flags;
+    int flags = SQLITE_OPEN_FULLMUTEX | additional_flags;
+    if (m_read_only) {
+        flags |= SQLITE_OPEN_READONLY;
+    } else {
+        flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+    }
 
     if (m_db == nullptr) {
         if (!(flags & SQLITE_OPEN_MEMORY)) {
@@ -279,24 +284,27 @@ void SQLiteDatabase::Open(int additional_flags)
         }
     }
 
-    if (sqlite3_db_readonly(m_db, "main") != 0) {
+    if (!m_read_only && sqlite3_db_readonly(m_db, "main") != 0) {
         throw std::runtime_error("SQLiteDatabase: Database opened in readonly mode but read-write permissions are needed");
     }
 
-    // Acquire an exclusive lock on the database
-    // First change the locking mode to exclusive
-    SetPragma(m_db, "locking_mode", "exclusive", "Unable to change database locking mode to exclusive");
-    // Now begin a transaction to acquire the exclusive lock. This lock won't be released until we close because of the exclusive locking mode.
-    int ret = sqlite3_exec(m_db, "BEGIN EXCLUSIVE TRANSACTION", nullptr, nullptr, nullptr);
-    if (ret != SQLITE_OK) {
-        throw std::runtime_error("SQLiteDatabase: Unable to obtain an exclusive lock on the database, is it being used by another instance of " CLIENT_NAME "?\n");
-    }
-    ret = sqlite3_exec(m_db, "COMMIT", nullptr, nullptr, nullptr);
-    if (ret != SQLITE_OK) {
-        throw std::runtime_error(strprintf("SQLiteDatabase: Unable to end exclusive lock transaction: %s\n", sqlite3_errstr(ret)));
+    int ret;
+    if (!m_read_only) {
+        // Acquire an exclusive lock on the database
+        // First change the locking mode to exclusive
+        SetPragma(m_db, "locking_mode", "exclusive", "Unable to change database locking mode to exclusive");
+        // Now begin a transaction to acquire the exclusive lock. This lock won't be released until we close because of the exclusive locking mode.
+        ret = sqlite3_exec(m_db, "BEGIN EXCLUSIVE TRANSACTION", nullptr, nullptr, nullptr);
+        if (ret != SQLITE_OK) {
+            throw std::runtime_error("SQLiteDatabase: Unable to obtain an exclusive lock on the database, is it being used by another instance of " CLIENT_NAME "?\n");
+        }
+        ret = sqlite3_exec(m_db, "COMMIT", nullptr, nullptr, nullptr);
+        if (ret != SQLITE_OK) {
+            throw std::runtime_error(strprintf("SQLiteDatabase: Unable to end exclusive lock transaction: %s\n", sqlite3_errstr(ret)));
+        }
     }
 
-    // Enable fullfsync for the platforms that use it
+    // Enable fullfsync for the platforms that use it - this doesn't write to the database
     SetPragma(m_db, "fullfsync", "true", "Failed to enable fullfsync");
 
     if (m_use_unsafe_sync) {
@@ -310,6 +318,9 @@ void SQLiteDatabase::Open(int additional_flags)
     sqlite3_stmt* check_main_stmt{nullptr};
     ret = sqlite3_prepare_v2(m_db, "SELECT name FROM sqlite_master WHERE type='table' AND name='main'", -1, &check_main_stmt, nullptr);
     if (ret != SQLITE_OK) {
+        if (ret == SQLITE_LOCKED || ret == SQLITE_BUSY) {
+            throw std::runtime_error("SQLiteDatabase: Unable to obtain an exclusive lock on the database, is it being used by another instance of " CLIENT_NAME "?\n");
+        }
         throw std::runtime_error(strprintf("SQLiteDatabase: Failed to prepare statement to check table existence: %s\n", sqlite3_errstr(ret)));
     }
     ret = sqlite3_step(check_main_stmt);
@@ -325,8 +336,14 @@ void SQLiteDatabase::Open(int additional_flags)
         throw std::runtime_error(strprintf("SQLiteDatabase: Failed to execute statement to check table existence: %s\n", sqlite3_errstr(ret)));
     }
 
+    // For read-only databases, table must exist
+    if (!table_exists && m_read_only) {
+        throw std::runtime_error("SQLiteDatabase: Cannot open read-only database without existing main table");
+    }
+
     // Do the db setup things because the table doesn't exist only when we are creating a new wallet
-    if (!table_exists) {
+    // Only do table creation and setup in read-write mode
+    if (!table_exists && !m_read_only) {
         ret = sqlite3_exec(m_db, "CREATE TABLE main(key BLOB PRIMARY KEY NOT NULL, value BLOB NOT NULL)", nullptr, nullptr, nullptr);
         if (ret != SQLITE_OK) {
             throw std::runtime_error(strprintf("SQLiteDatabase: Failed to create new database: %s\n", sqlite3_errstr(ret)));
